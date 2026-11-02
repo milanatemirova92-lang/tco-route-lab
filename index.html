@@ -1,0 +1,823 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#0F172A"><link rel="apple-touch-icon" href="/icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="TCO Lab"><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body>
+<title>TCO Route Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--gold:#0EA5E9;--amb:#0284c7;--cy:#7dd3fc;--navy:#0F172A;--navy2:#1e293b;--pn:rgba(15,23,42,.82);--ln:rgba(71,85,105,.75)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;background:var(--navy);color:#fff;font-family:Montserrat,system-ui,sans-serif;overflow:hidden}
+#map,#three{position:fixed;inset:0;width:100%;height:100%}
+#three{z-index:2;display:none;background:#000}
+.pn{background:var(--pn);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--ln);border-radius:14px}
+button{font:inherit;cursor:pointer;color:#fff;background:rgba(71,85,105,.35);border:1px solid rgba(148,163,184,.45);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:600;touch-action:manipulation}
+button:hover{background:rgba(14,165,233,.3)}
+button.on{background:var(--gold);color:#04101f;border-color:var(--gold)}
+button.go{background:linear-gradient(135deg,var(--gold),var(--amb));color:var(--navy);border-color:var(--gold);font-weight:800}
+[hidden]{display:none!important}
+#top{position:fixed;z-index:5;left:8px;right:8px;top:calc(8px + env(safe-area-inset-top,0px));padding:6px 8px;display:flex;gap:6px;align-items:center}
+#top .lg{font-weight:800;letter-spacing:.08em;color:var(--gold);font-size:12px;white-space:nowrap;padding:0 6px}
+#nav{display:flex;gap:5px;overflow-x:auto;flex:1;scrollbar-width:none}#nav::-webkit-scrollbar{display:none}
+#nav button{white-space:nowrap;font-size:10.5px;padding:7px 9px}
+#sc{white-space:nowrap;font-size:12px;font-weight:800;color:var(--gold)}
+#lay{position:fixed;z-index:4;right:8px;top:calc(62px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:5px;padding:7px}
+#lay button{font-size:10.5px;text-align:left}
+#views{position:fixed;z-index:4;left:8px;top:calc(62px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:5px;padding:7px}
+#views button{font-size:10.5px;text-align:left}
+#dock{position:fixed;z-index:4;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));max-width:860px;margin:auto;padding:9px;display:grid;gap:7px}
+.row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.row>button{flex:1;min-width:70px}
+#stats{font-size:11px;line-height:1.5;color:#cbd5e1}#stats em{color:var(--gold);font-style:normal;font-weight:800}
+.meter{height:6px;border-radius:6px;background:rgba(255,255,255,.12);overflow:hidden}.meter div{height:100%;background:linear-gradient(90deg,var(--cy),var(--gold));width:0}
+#tl{display:flex;gap:3px}#tl span{flex:1;font-size:8.5px;text-align:center;padding:4px 1px;border-radius:6px;background:rgba(255,255,255,.07);color:#94a3b8;font-weight:600;line-height:1.15}
+#tl span.on{background:var(--gold);color:var(--navy)}#tl span.dn{background:rgba(14,165,233,.25);color:#fff}
+.foot{font-size:9px;opacity:.6;line-height:1.35}
+#card{position:fixed;z-index:6;left:8px;top:calc(62px + env(safe-area-inset-top,0px));width:min(380px,calc(100% - 16px));max-height:calc(100% - 230px);overflow:auto;padding:14px;margin:0 auto;left:0;right:0;animation:in .3s ease}
+@media(min-width:900px){#card{left:150px;right:auto;margin:0}}
+@keyframes in{from{opacity:0;transform:translateY(-8px)}}
+#card h3,.modal h3{margin:6px 0;font-size:17px;color:var(--gold)}#card p{margin:0 0 8px;font-size:12.5px;line-height:1.5}
+#card img{width:100%;border-radius:10px;margin:4px 0 8px;display:block;max-height:150px;object-fit:cover}
+.ph{height:84px;border-radius:10px;margin:4px 0 8px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#cde;background:repeating-linear-gradient(45deg,#1e293b,#1e293b 8px,#172033 8px,#172033 16px);border:1px dashed var(--ln);text-align:center;padding:6px}
+.b{display:inline-block;font-size:9px;font-weight:800;padding:2px 7px;border-radius:20px;letter-spacing:.06em;margin-right:4px}
+.bf{background:var(--gold);color:var(--navy)}.bs{background:rgba(14,165,233,.2);color:var(--cy);border:1px solid var(--cy)}.bg{background:rgba(255,120,60,.2);color:#ffb38a;border:1px solid #ff8a4c}
+.x{position:absolute;right:8px;top:6px;padding:2px 8px}
+.modal{position:fixed;z-index:8;inset:0;background:rgba(2,8,24,.72);display:flex;align-items:center;justify-content:center;padding:12px}
+.modal>div{width:min(720px,100%);max-height:92%;overflow:auto;padding:18px;position:relative}
+.q{display:block;width:100%;text-align:left;margin:5px 0;font-size:12.5px;padding:10px}.q.ok{background:#1d8a4a;border-color:#4cf08a}.q.no{background:#8a2a2a;border-color:#f06}
+details{background:rgba(255,255,255,.05);border-radius:10px;margin:5px 0;padding:8px 10px;font-size:12.5px;line-height:1.5}summary{cursor:pointer;font-weight:600}
+h4{color:var(--cy);margin:14px 0 4px;font-size:12px;letter-spacing:.06em}
+table{width:100%;border-collapse:collapse;font-size:11.5px}td,th{padding:5px;border-bottom:1px solid rgba(255,255,255,.12);text-align:left;vertical-align:top}th{color:var(--gold)}
+input[type=range]{width:100%;accent-color:var(--gold)}label{font-size:11.5px;display:block;margin-top:8px}
+#toast{position:fixed;z-index:9;left:50%;top:38%;transform:translate(-50%,-50%) scale(.8);padding:12px 20px;font-weight:800;color:var(--gold);opacity:0;pointer-events:none;transition:.35s;text-align:center}
+#toast.s{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#hud{position:fixed;z-index:3;left:8px;right:8px;top:calc(62px + env(safe-area-inset-top,0px));display:none;pointer-events:none}
+#hud>div{display:inline-block;padding:8px 12px;font-size:12px}
+.lbl{position:fixed;z-index:3;pointer-events:none;font-size:10.5px;font-weight:700;color:#fff;background:rgba(15,23,42,.75);border:1px solid var(--ln);border-radius:8px;padding:2px 6px;transform:translate(-50%,-120%);white-space:nowrap;display:none}
+#jc{position:fixed;z-index:5;left:50%;transform:translateX(-50%);bottom:calc(150px + env(safe-area-inset-bottom,0px));padding:8px;display:none;gap:6px}
+.maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{bottom:150px}
+.maplibregl-popup-content{background:var(--pn);color:#fff;border-radius:10px;font:600 12px Montserrat}
+/* minimal MapLibre CSS (inlined) */
+.maplibregl-map{overflow:hidden;position:fixed}.maplibregl-canvas{position:absolute;left:0;top:0}.maplibregl-canvas-container.maplibregl-interactive{cursor:grab;user-select:none;touch-action:none}
+.maplibregl-marker{position:absolute;top:0;left:0;will-change:transform}.maplibregl-control-container{pointer-events:none}.maplibregl-ctrl{pointer-events:auto;clear:both}
+.maplibregl-ctrl-top-left,.maplibregl-ctrl-top-right,.maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{position:absolute;pointer-events:none;z-index:2}
+.maplibregl-ctrl-bottom-right{right:8px}.maplibregl-ctrl-bottom-left{left:8px}.maplibregl-ctrl-top-right{right:0;top:0}.maplibregl-ctrl-top-left{left:0;top:0}
+.maplibregl-ctrl-group{background:var(--pn);border:1px solid var(--ln);border-radius:10px;overflow:hidden;margin:0 0 6px}.maplibregl-ctrl-group button{display:block;width:34px;height:34px;border:0;border-radius:0;padding:0;font-size:18px;background:transparent;color:#fff;position:relative}
+.maplibregl-ctrl-zoom-in::after{content:'+'}.maplibregl-ctrl-zoom-out::after{content:'\2212'}.maplibregl-ctrl-compass::after{content:'\2B06'}.maplibregl-ctrl-icon{font-size:0}.maplibregl-ctrl-zoom-in::after,.maplibregl-ctrl-zoom-out::after,.maplibregl-ctrl-compass::after{font-size:17px}.maplibregl-ctrl-compass .maplibregl-ctrl-icon{display:none}
+.maplibregl-ctrl-attrib{background:rgba(15,23,42,.7);font-size:9px;padding:0 5px;border-radius:6px;color:#cbd5e1;margin:0 4px 2px}.maplibregl-ctrl-attrib a{color:#cbd5e1}.maplibregl-ctrl-attrib-button{display:none}.maplibregl-compact-show .maplibregl-ctrl-attrib-inner,.maplibregl-ctrl-attrib-inner{display:inline}
+.maplibregl-popup{position:absolute;top:0;left:0;pointer-events:none}.maplibregl-popup-content{padding:8px 10px;pointer-events:auto}.maplibregl-user-select-none{user-select:none}
+@media(max-width:620px){#views{top:auto;bottom:210px}#lay{top:calc(60px + env(safe-area-inset-top,0px))}#views button{padding:6px 7px;font-size:9.5px}}
+</style>
+<div id="map"></div><canvas id="three"></canvas>
+<div id="top" class="pn"><span class="lg">TCO · ROUTE LAB</span><div id="nav"></div><span id="sc">★ 0</span></div>
+<div id="views" class="pn"></div><div id="lay" class="pn"></div>
+<div id="hud"><div class="pn" id="hudt"></div></div>
+<div id="card" class="pn" hidden></div>
+<div id="jc" class="pn"><button id="jp">❚❚ Pause</button><button id="jr">↺ Replay</button><button id="js">Skip ▶▶</button><button id="jx">Exit</button></div>
+<div id="toast" class="pn"></div>
+<div id="dock" class="pn">
+ <div class="row" id="rm"></div>
+ <div class="row" id="rf" hidden><button id="bl">◀</button><button id="br">▶</button><button id="bb">BRAKE</button><button id="bo" class="go">BOOST</button><button id="pa">❚❚</button><button id="ex">Exit</button></div>
+ <div class="meter"><div id="pb"></div></div>
+ <div id="tl"></div>
+ <div id="stats">Choose a route and press “Ride the Oil”, or watch the 60-second journey. Tap any marker for facts.</div>
+ <div class="foot">REAL = public facts · SCHEMATIC = approximate geometry · SIMULATION = game values. Imagery © Esri, Maxar, Earthstar Geographics, USGS · basemap © CARTO/OpenStreetMap contributors · elevation: Mapzen/AWS Terrain Tiles.</div>
+</div>
+<div id="modals"></div>
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+/* ===== DATA ===== */
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const TAG={real:['REAL','bf'],sch:['SCHEMATIC','bs'],sim:['SIMULATION DATA','bg']};
+/* Objects. kind: real=fact-based location, pos accuracy noted. */
+const NODES={
+ tengiz:{n:'Tengiz Oil Field',ll:[53.40,46.15],k:'field',tag:'real',type:'Oil field',reg:'Atyrau Region, Kazakhstan',zoom:11,
+  role:'Start of the chain: crude is produced from deep, high-pressure reservoirs on the north-eastern Caspian shore.',
+  next:'Processing facilities',prev:'—',
+  facts:['Developed by Tengizchevroil (TCO), founded 1993.','Shareholders per group presentation: Chevron 50%, ExxonMobil 25%, KazMunayGas 20%, LUKOIL 5%.','Satellite view shows the real industrial complex, not an illustration.']},
+ plant:{n:'TCO Processing Facilities',ll:[53.39,46.13],k:'plant',tag:'sch',type:'Processing complex (general area)',reg:'Tengiz, Atyrau Region',zoom:13,
+  role:'Separates oil, gas and water; treats sour gas; produces sulfur. Exact unit positions are not shown.',
+  next:'CPC / export pipeline',prev:'Tengiz field',
+  facts:['Stages are distinct: production → oil treatment → gas processing → sulfur → export transport.','The 3D scene is a CONCEPTUAL illustration, not the real layout.']},
+ atyrau:{n:'Atyrau (CPC pumping area)',ll:[51.92,47.10],k:'pump',tag:'sch',type:'Pumping station area',reg:'Atyrau, Kazakhstan',zoom:9,
+  role:'CPC starts here: oil from Tengiz and other fields is pumped west toward Russia.',next:'Kropotkinskaya',prev:'Tengiz',
+  facts:['CPC pumping station position approximate.']},
+ kropot:{n:'Kropotkinskaya Pumping Station',ll:[40.57,45.43],k:'pump',tag:'sch',type:'Pumping station',reg:'Krasnodar Krai, Russia',zoom:10,
+  role:'Key CPC pumping node before the final stretch to the Black Sea.',next:'Krymskaya',prev:'Atyrau',facts:['Named in CPC public materials; marker placed near Kropotkin town.']},
+ krym:{n:'Krymskaya Pumping Station',ll:[37.99,44.93],k:'pump',tag:'sch',type:'Pumping station',reg:'Krasnodar Krai, Russia',zoom:10,
+  role:'Last major pumping node before the marine terminal.',next:'CPC Marine Terminal',prev:'Kropotkinskaya',facts:['Position approximate.']},
+ term:{n:'CPC Marine Terminal',ll:[37.64,44.66],k:'term',tag:'real',type:'Export terminal',reg:'Yuzhnaya Ozereyevka, near Novorossiysk, Russia',zoom:12,
+  role:'Oil is loaded onto tankers via offshore single-point moorings (floating buoys and hoses) rather than a conventional quay.',
+  next:'Tanker loading',prev:'Krymskaya',facts:['Tank farm on shore, loading buoys offshore.','Buoy coordinates are approximate.']},
+ spm:{n:'Loading buoy zone (SPM, approx.)',ll:[37.57,44.60],k:'spm',tag:'sch',type:'Offshore mooring zone',reg:'Black Sea',zoom:12,
+  role:'Tankers moor here and take oil via floating hoses.',next:'Black Sea voyage',prev:'Terminal tanks',facts:['Exact buoy positions not shown.']},
+ bosph:{n:'Bosphorus & Dardanelles',ll:[29.05,41.12],k:'strait',tag:'real',type:'Turkish straits',reg:'Türkiye',zoom:10,
+  role:'The only sea passage from the Black Sea to the Mediterranean; every CPC tanker passes through.',next:'Mediterranean',prev:'Black Sea',facts:['Heavy shipping traffic; tankers follow regulated lanes.']},
+ dest:{n:'Mediterranean → World Markets',ll:[23.5,34.2],k:'dest',tag:'sim',type:'Symbolic destination',reg:'Mediterranean Sea',zoom:6,
+  role:'Game end point. Real buyers and volumes by country are not shown.',next:'—',prev:'Bosphorus',facts:['Symbolic only.']},
+ aktau:{n:'Aktau Port',ll:[51.17,43.62],k:'port',tag:'real',type:'Caspian port',reg:'Mangystau, Kazakhstan',zoom:11,
+  role:'Kazakhstan’s Caspian port; start of the possible Trans-Caspian corridor (group scenario).',next:'Caspian crossing',prev:'Tengiz (by rail/other)',
+  facts:['Trans-Caspian is a scenario, not a confirmed TCO commercial flow.']},
+ baku:{n:'Baku',ll:[49.87,40.41],k:'city',tag:'real',type:'City / Caspian port region',reg:'Azerbaijan',zoom:9,role:'Gateway of the Trans-Caspian corridor.',next:'Sangachal',prev:'Aktau',facts:['Capital of Azerbaijan on the Caspian shore.']},
+ sang:{n:'Sangachal Terminal',ll:[49.46,40.19],k:'term',tag:'real',type:'Oil & gas terminal',reg:'South of Baku, Azerbaijan',zoom:11,
+  role:'Start of the BTC pipeline. Located ~45 km south of Baku, not in the city.',next:'BTC pipeline',prev:'Baku',facts:['BTC = Baku–Tbilisi–Ceyhan.']},
+ tbilisi:{n:'Tbilisi area (BTC)',ll:[44.9,41.55],k:'pump',tag:'sch',type:'Pipeline corridor',reg:'Georgia',zoom:9,role:'BTC crosses Georgia near Tbilisi (south of the city).',next:'Turkey section',prev:'Sangachal',facts:['Route drawn schematically.']},
+ ceyhan:{n:'Ceyhan Marine Terminal',ll:[35.93,36.88],k:'term',tag:'real',type:'Export terminal',reg:'Ceyhan, Adana, Türkiye',zoom:11,
+  role:'Mediterranean end of the BTC pipeline.',next:'Mediterranean markets',prev:'BTC',facts:['BTC is NOT confirmed as a TCO export route; it is a scenario in this game.']}
+};
+/* Route line coordinates [lon,lat]. All schematic unless stated. */
+const L={
+ cpcPipe:[[53.40,46.15],[52.6,46.6],[51.92,47.10],[50.3,47.0],[48.4,46.6],[47.0,46.2],[45.5,45.9],[43.8,45.7],[42.2,45.5],[40.57,45.43],[39.2,45.2],[37.99,44.93],[37.70,44.72],[37.64,44.66],[37.57,44.60]],
+ cpcSea:[[37.57,44.60],[36.4,44.1],[34.5,43.5],[32.0,42.6],[30.2,41.9],[29.45,41.40],[29.14,41.22],[29.05,41.12],[28.98,41.02],[28.5,40.90],[27.5,40.75],[26.8,40.45],[26.35,40.12],[26.15,39.95],[25.5,39.55],[25.1,38.7],[25.3,37.6],[26.6,36.2],[26.7,35.3],[26.0,34.4],[24.5,34.2],[23.5,34.2]],
+ aktauLink:[[53.40,46.15],[52.7,45.2],[52.0,44.3],[51.17,43.62]],
+ caspian:[[51.17,43.62],[50.6,42.6],[50.3,41.4],[50.0,40.6],[49.7,40.35],[49.46,40.19]],
+ btc:[[49.46,40.19],[48.0,40.45],[46.6,40.7],[45.4,41.35],[44.9,41.55],[44.1,41.55],[42.7,41.1],[41.3,39.9],[39.5,39.75],[37.0,39.7],[36.9,37.7],[35.93,36.88]],
+ btcSea:[[35.93,36.88],[34.5,36.2],[32.5,35.7],[30.0,34.9],[26.0,34.4],[24.5,34.2],[23.5,34.2]]
+};
+/* Stages for the timeline */
+const STAGES=['Extraction','Treatment','Pipeline entry','Pipeline','Terminal','Loading','Sea','Destination'];
+/* Route objects with cumulative distance and sampler */
+const D2R=Math.PI/180;
+function hav(a,b){const dl=(b[1]-a[1])*D2R,dn=(b[0]-a[0])*D2R,x=Math.sin(dl/2)**2+Math.cos(a[1]*D2R)*Math.cos(b[1]*D2R)*Math.sin(dn/2)**2;return 12742*Math.asin(Math.sqrt(x))}
+function brg(a,b){const y=Math.sin((b[0]-a[0])*D2R)*Math.cos(b[1]*D2R),x=Math.cos(a[1]*D2R)*Math.sin(b[1]*D2R)-Math.sin(a[1]*D2R)*Math.cos(b[1]*D2R)*Math.cos((b[0]-a[0])*D2R);return(Math.atan2(y,x)/D2R+360)%360}
+function mkLine(c){const cum=[0];for(let i=1;i<c.length;i++)cum.push(cum[i-1]+hav(c[i-1],c[i]));return{c,cum,len:cum[cum.length-1],
+ at(d){d=Math.max(0,Math.min(this.len,d));let i=1;while(i<cum.length-1&&cum[i]<d)i++;const t=(d-cum[i-1])/((cum[i]-cum[i-1])||1),a=c[i-1],b=c[i];return{ll:[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t],b:brg(a,b)}}}}
+const LN={};for(const k in L)LN[k]=mkLine(L[k]);
+/* A full route = ordered parts, each {line, kind:'pipe'|'sea'|'rail'} with checkpoints by node id at part boundaries/offsets */
+const ROUTES={
+ cpc:{id:'cpc',name:'CPC → Novorossiysk → Mediterranean',short:'CPC → Novorossiysk',cost:38,costNote:'$38/t — group estimate',color:'#0ea5e9',
+  parts:[{ln:'cpcPipe',kind:'pipe'},{ln:'cpcSea',kind:'sea',sea:'black'}],
+  cps:[['tengiz',0],['plant',2],['atyrau',0],['kropot',0],['krym',0],['term',0],['spm',0],['bosph',0],['dest',0]],
+  end:'<b>CPC:</b> Tengiz → Atyrau → Kropotkinskaya → Krymskaya → Novorossiysk terminal → Bosphorus → Mediterranean. Main TCO export route (≈80% of Kazakhstan’s oil exports, per group presentation). Risk: concentration on one path.'},
+ btc:{id:'btc',name:'Aktau → Baku → BTC → Ceyhan (idea)',short:'Aktau–Baku–BTC (idea)',cost:113,costNote:'$113/t — group estimate; +$75/t vs CPC',color:'#7dd3fc',
+  parts:[{ln:'aktauLink',kind:'rail'},{ln:'caspian',kind:'sea',sea:'caspian'},{ln:'btc',kind:'pipe'},{ln:'btcSea',kind:'sea',sea:'med'}],
+  cps:[['tengiz',0],['aktau',0],['baku',0],['sang',0],['tbilisi',0],['ceyhan',0],['dest',0]],
+  end:'<b>Group idea:</b> Tengiz → Aktau → Caspian → Baku → BTC → Ceyhan. About $75/t more expensive but reduces single-route risk. A scenario, not confirmed TCO volume.'}
+};
+for(const r of Object.values(ROUTES)){let o=0;r.parts.forEach(p=>{p.line=LN[p.ln];p.off=o;o+=p.line.len});r.len=o;
+ r.at=d=>{d=Math.max(0,Math.min(r.len,d));for(const p of r.parts)if(d<=p.off+p.line.len+1e-6){const s=p.line.at(d-p.off);s.part=p;return s}const p=r.parts[r.parts.length-1],s=p.line.at(p.line.len);s.part=p;return s};
+ r.cpD=r.cps.map(([id,i])=>{ // distance of checkpoint = nearest point on route to node
+  const ll=NODES[id].ll;let best=0,bd=1e9;for(let d=0;d<=r.len;d+=r.len/1500){const q=r.at(d).ll,x=hav(q,ll);if(x<bd){bd=x;best=d}}return best});
+ r.cpD[0]=0;r.cps.forEach((c,i)=>{if(c[0]=='plant')r.cpD[i]=Math.max(r.cpD[i],10)});r.cpD[r.cpD.length-1]=r.len}
+/* Infrastructure status (SIMULATION) */
+const INFRA=[['Pipeline','CPC trunk line'],['Pump stations','Atyrau → Krymskaya'],['Marine terminal','Tank farm + SPM'],['Sea transport','Black Sea → Med']];
+/* ===== MAP ===== */
+let map,mapOK=false,curLayer='sat',R=ROUTES.cpc,score=0,visited={},done=[0,0,0,0,0,0];
+const TASKS=['Find the Tengiz field (tap its marker)','Ride the oil along CPC to the sea terminal','Quiz: what share of Kazakhstan’s oil exports goes via CPC?','Ride the oil along BTC to Ceyhan (scenario)','Collect 12 oil barrels while riding','Discover 6 industrial objects'];
+const ESRI='https://server.arcgisonline.com/ArcGIS/rest/services/';
+const ras=(t,a,mz)=>({type:'raster',tiles:t,tileSize:256,maxzoom:mz||18,attribution:a});
+const STYLE={version:8,glyphs:'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
+ sources:{
+  sat:ras([ESRI+'World_Imagery/MapServer/tile/{z}/{y}/{x}'],'Imagery © Esri, Maxar, Earthstar Geographics',18),
+  lbl:ras([ESRI+'Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}'],'© Esri',18),
+  relief:ras([ESRI+'World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}'],'Relief © Esri',13),
+  physical:ras([ESRI+'World_Physical_Map/MapServer/tile/{z}/{y}/{x}'],'© Esri, US National Park Service',8),
+  carto:ras(['a','b','c','d'].map(s=>'https://'+s+'.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png'),'© CARTO © OpenStreetMap contributors',19),
+  dem:{type:'raster-dem',tiles:['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],tileSize:256,maxzoom:13,encoding:'terrarium',attribution:'Terrain: Mapzen/AWS'}},
+ layers:[{id:'bg',type:'background',paint:{'background-color':'#111c33'}},
+  {id:'physical',type:'raster',source:'physical',layout:{visibility:'none'}},
+  {id:'relief',type:'raster',source:'relief',layout:{visibility:'none'}},
+  {id:'carto',type:'raster',source:'carto',layout:{visibility:'none'}},
+  {id:'sat',type:'raster',source:'sat'},
+  {id:'hill',type:'hillshade',source:'dem',layout:{visibility:'none'},paint:{'hillshade-exaggeration':.5}},
+  {id:'lbl',type:'raster',source:'lbl',paint:{'raster-opacity':.9}}]};
+const LAYERS={
+ sat:{t:'🛰 Satellite',on:['sat','lbl'],ter:true},
+ terrain:{t:'⛰ Terrain',on:['physical','relief','hill','lbl'],ter:true,ex:2.2},
+ ind:{t:'🏭 Industrial',on:['sat'],op:{sat:.55},ter:false,glow:true},
+ pol:{t:'🏛 Political',on:['carto'],ter:false}};
+function setLayer(k){curLayer=k;const c=LAYERS[k];if(!mapOK)return;
+ ['physical','relief','carto','sat','hill','lbl'].forEach(i=>map.setLayoutProperty(i,'visibility',c.on.includes(i)?'visible':'none'));
+ map.setPaintProperty('sat','raster-opacity',(c.op&&c.op.sat)||1);
+ map.setPaintProperty('bg','background-color',k=='ind'?'#0F172A':'#111c33');
+ try{map.setTerrain(c.ter?{source:'dem',exaggeration:c.ex||1.3}:null)}catch(e){}
+ map.setPaintProperty('routes-glow','line-opacity',k=='ind'?.9:.5);
+ $$('#lay button').forEach(b=>b.classList.toggle('on',b.dataset.k==k))}
+function initMap(){
+ try{map=new maplibregl.Map({container:'map',style:STYLE,center:[45,44],zoom:3.6,pitch:0,maxPitch:78,attributionControl:{compact:true},fadeDuration:150})}catch(e){fail(e);return}
+ map.addControl(new maplibregl.NavigationControl({visualizePitch:true}),'bottom-right');
+ map.on('error',e=>{if(e&&e.error&&/Failed|fetch|tile|403|404/i.test(e.error.message||''))mapWarn()});
+ map.on('load',()=>{mapOK=true;
+  const feat=(rt,p)=>({type:'Feature',properties:{k:p.kind,r:rt.id},geometry:{type:'LineString',coordinates:p.line.c}});
+  const fc=[];for(const r of Object.values(ROUTES))r.parts.forEach(p=>fc.push(feat(r,p)));
+  map.addSource('routes',{type:'geojson',data:{type:'FeatureCollection',features:fc}});
+  map.addSource('prog',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+  map.addSource('barrels',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+  map.addSource('batch',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+  map.addLayer({id:'routes-glow',type:'line',source:'routes',paint:{'line-color':'#000','line-width':['interpolate',['linear'],['zoom'],3,5,10,12],'line-opacity':.5,'line-blur':2}});
+  map.addLayer({id:'routes-pipe',type:'line',source:'routes',filter:['==',['get','k'],'pipe'],layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':['match',['get','r'],'cpc','#0ea5e9','#7dd3fc'],'line-width':['interpolate',['linear'],['zoom'],3,2.2,10,5,15,8],'line-opacity':['case',['==',['get','r'],R.id],1,.45]}});
+  map.addLayer({id:'routes-flow',type:'line',source:'routes',filter:['==',['get','k'],'pipe'],paint:{'line-color':'#2b1a05','line-width':['interpolate',['linear'],['zoom'],3,1,10,2.2,15,4],'line-dasharray':[0,4,3]}});
+  map.addLayer({id:'routes-sea',type:'line',source:'routes',filter:['in',['get','k'],['literal',['sea','rail']]],layout:{'line-cap':'round'},paint:{'line-color':'#7dd3fc','line-width':['interpolate',['linear'],['zoom'],3,1.6,10,3],'line-dasharray':[2,2],'line-opacity':['case',['==',['get','r'],R.id],1,.5]}});
+  map.addLayer({id:'prog-l',type:'line',source:'prog',layout:{'line-cap':'round'},paint:{'line-color':'#e0f2fe','line-width':['interpolate',['linear'],['zoom'],3,3,12,6],'line-opacity':.9}});
+  map.addLayer({id:'batch-l',type:'circle',source:'batch',paint:{'circle-radius':['interpolate',['linear'],['zoom'],3,2.5,12,6],'circle-color':'#1a0f02','circle-stroke-color':'#7dd3fc','circle-stroke-width':1.5}});
+  map.addLayer({id:'barrels-l',type:'circle',source:'barrels',paint:{'circle-radius':['interpolate',['linear'],['zoom'],6,5,14,12],'circle-color':'#38bdf8','circle-stroke-color':'#3b2a00','circle-stroke-width':2}});
+  addMarkers();setLayer('sat');animateFlow();map.once('idle',()=>$('#toast')&&0);
+  setTimeout(()=>{if(!map.loaded())mapWarn()},9000)});
+ map.on('click',()=>{});}
+let warned=false;function mapWarn(){if(warned)return;warned=true;say('Some map tiles failed to load — check your connection. Fallback basemap: Political view.');if(mapOK&&curLayer=='sat')setTimeout(()=>{if(!map.areTilesLoaded())setLayer('pol')},4000)}
+function fail(e){document.body.insertAdjacentHTML('beforeend','<div class="pn" style="position:fixed;z-index:20;inset:30% 10%;padding:20px">WebGL map could not start: '+e.message+'<br>Try a modern browser with WebGL enabled.</div>')}
+/* markers */
+const ICON={field:'🛢',plant:'🏭',pump:'⚙',term:'⚓',spm:'⛽',strait:'🌉',dest:'🌍',port:'🚢',city:'🏙'};
+const MK={};
+function addMarkers(){for(const[id,n]of Object.entries(NODES)){
+ const el=document.createElement('div');el.style.cssText='width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;border:2px solid '+(n.k=='field'?'#0ea5e9':'#7dd3fc')+';background:rgba(15,23,42,.88);box-shadow:0 0 12px '+(n.k=='field'?'#0ea5e9':'#7dd3fc')+'99';
+ el.textContent=ICON[n.k]||'●';el.title=n.n;el.onclick=e=>{e.stopPropagation();showNode(id,true)};
+ const lab=document.createElement('div');lab.textContent=n.n;lab.style.cssText='position:absolute;left:34px;top:5px;font:700 11px Montserrat;white-space:nowrap;text-shadow:0 0 4px #000,0 0 4px #000;pointer-events:none';el.appendChild(lab);el.dataset.id=id;
+ MK[id]=new maplibregl.Marker({element:el}).setLngLat(n.ll).addTo(map)}}
+function markVisited(id){if(MK[id])MK[id].getElement().style.background='rgba(20,120,60,.95)'}
+/* flow animation of oil in pipe */
+let dashStep=0;const DASH=[[0,4,3],[.5,4,2.5],[1,4,2],[1.5,4,1.5],[2,4,1],[2.5,4,.5],[3,4,0],[0,.5,3,3.5],[0,1,3,3],[0,1.5,3,2.5],[0,2,3,2],[0,2.5,3,1.5],[0,3,3,1],[0,3.5,3,.5]];
+function animateFlow(){setInterval(()=>{if(!mapOK||document.hidden)return;dashStep=(dashStep+1)%DASH.length;map.setPaintProperty('routes-flow','line-dasharray',DASH[dashStep]);moveBatches()},90)}
+let batchT=0;function moveBatches(){batchT+=.0035*(window.flowSpeed||1);const f=[];const r=R;r.parts.forEach(p=>{if(p.kind!='pipe')return;for(let i=0;i<14;i++){const d=((batchT+i/14)%1)*p.line.len;f.push({type:'Feature',properties:{},geometry:{type:'Point',coordinates:p.line.at(d).ll}})}});map.getSource('batch').setData({type:'FeatureCollection',features:f})}
+/* mission/score */
+function say(t){const e=$('#toast');e.innerHTML=t;e.classList.add('s');clearTimeout(say.t);say.t=setTimeout(()=>e.classList.remove('s'),2000)}
+function addScore(n){score+=n;$('#sc').textContent='★ '+score}
+function ok(k){if(done[k])return;done[k]=1;addScore(100);say('✔ Mission complete! +100');if(done.slice(0,5).every(x=>x))setTimeout(()=>showHTML('<span class="b bf">ALL MISSIONS DONE</span><h3>You rode the whole chain</h3><p>CPC is cheaper ($38/t, group estimate) but concentrated. The BTC scenario costs about $75/t more yet adds flexibility.</p>'),2200)}
+function showMissions(){const n=done.filter(x=>x).length;showHTML('<h3>Missions '+n+'/6</h3><div class="meter"><div style="width:'+n/6*100+'%"></div></div>'+TASKS.map((t,k)=>'<div style="padding:7px;margin:4px 0;border-radius:8px;background:rgba(255,255,255,.06);font-size:12px;'+(done[k]?'opacity:.55;text-decoration:line-through':'')+'">'+(done[k]?'✔ ':(k+1)+'. ')+t+(k==2&&!done[2]?' <button class="qq" style="padding:3px 8px;font-size:11px">Answer</button>':'')+'</div>').join(''));const b=$('.qq');if(b)b.onclick=missionQuiz}
+function missionQuiz(){showHTML('<h3>Quiz</h3><p>What share of Kazakhstan’s oil exports moves through CPC? (group presentation)</p>'+['≈20%','≈50%','≈80%'].map((a,i)=>'<button class="q" data-a="'+i+'">'+a+'</button>').join(''));
+ $$('#card .q').forEach(b=>b.onclick=()=>{if(b.dataset.a==2){b.classList.add('ok');ok(2)}else{b.classList.add('no');say('Not quite — try again')}})}
+/* info card */
+const card=$('#card');
+function showHTML(h){card.innerHTML='<button class="x" onclick="card.hidden=true">✕</button>'+h;card.hidden=false;card.style.animation='none';card.offsetWidth;card.style.animation=''}
+function showNode(id,fly){const n=NODES[id],t=TAG[n.tag];visited[id]=1;markVisited(id);
+ if(!done[5]&&Object.keys(visited).filter(k=>k[0]!='_').length>=6){ok(5)}
+ if(id=='tengiz')ok(0);
+ addScore(visited['_'+id]?0:10);visited['_'+id]=1;
+ const scn=n.k=='field'||n.k=='plant'?'<button data-s="complex">3D concept scene</button>':'';
+ showHTML('<span class="b '+t[1]+'">'+t[0]+'</span><span class="b bs">'+n.type+'</span><h3>'+n.n+'</h3>'+
+  '<div class="ph">Real photo: use satellite view (zoom in). 3D scenes are conceptual illustrations.</div>'+
+  '<p><b>'+n.reg+'</b></p><p>'+n.role+'</p><p style="font-size:11px;color:#94a3b8">◀ '+n.prev+' · ▶ '+n.next+'</p>'+
+  '<h4>FACTS &amp; NOTES</h4>'+n.facts.map(f=>'<p>• '+f+'</p>').join('')+
+  '<div class="row"><button data-s="show">Show on Map</button><button data-s="start" class="go">Start Journey Here</button><button data-s="more">Learn More</button>'+scn+'</div>');
+ card.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{const a=b.dataset.s;
+  if(a=='show')flyNode(id);else if(a=='start')startRideAt(id);else if(a=='more')openModal('faq');else if(a=='complex')openScene('complex',{cam:'field'})});
+ if(fly)flyNode(id)}
+function flyNode(id){const n=NODES[id];if(!mapOK)return;map.flyTo({center:n.ll,zoom:n.zoom+1.5,pitch:n.zoom>10?55:30,bearing:n.zoom>10?-20:0,duration:2600,essential:true})}
+/* ===== RIDE GAME + JOURNEY + VIEWS ===== */
+const G={mode:'map',pd:0,v:0,lane:0,pres:100,nk:1,dwell:0,ended:false,paused:false,barrels:[],got:0,key:{l:0,r:0,b:0,s:0},bear:0,sceneHold:false};
+window.flowSpeed=1;
+const tanker={show:false,ll:[37.57,44.6],b:0};
+const stageOf=(r,d)=>{if(d>=r.len-6)return 7;if(d<6)return 0;if(d<14)return 1;let p=r.parts[0];for(const q of r.parts)if(d>=q.off)p=q;
+ if(p.kind=='rail'||(p===r.parts[0]&&d<60))return 2;
+ if(p.kind=='sea')return d-p.off<6?5:6;
+ return d>p.off+p.line.len-6?4:3};
+function setStage(i){$$('#tl span').forEach((s,k)=>{s.classList.toggle('on',k==i);s.classList.toggle('dn',k<i)})}
+function perp(ll,b,o){const r=(b+90)*D2R;return[ll[0]+Math.sin(r)*o/Math.cos(ll[1]*D2R),ll[1]+Math.cos(r)*o]}
+function selRoute(id){R=ROUTES[id];$$('.rt').forEach(b=>b.classList.toggle('on',b.dataset.r==id));
+ if(mapOK){map.setPaintProperty('routes-pipe','line-opacity',['case',['==',['get','r'],R.id],1,.45]);map.setPaintProperty('routes-sea','line-opacity',['case',['==',['get','r'],R.id],1,.45]);fitRoute()}}
+function fitRoute(){if(!mapOK)return;const b=new maplibregl.LngLatBounds();R.parts.forEach(p=>p.line.c.forEach(c=>b.extend(c)));map.fitBounds(b,{padding:{top:90,bottom:220,left:60,right:60},pitch:0,bearing:0,duration:1800})}
+function setBarrels(){G.barrels=[];const n=36;for(let i=1;i<n;i++)G.barrels.push({d:R.len*i/n,lane:((i*7+3)%5-2)/2,got:0});drawBarrels()}
+function drawBarrels(){if(!mapOK)return;const f=G.barrels.filter(b=>!b.got&&R.at(b.d).part.kind!='sea').map(b=>{const s=R.at(b.d);return{type:'Feature',properties:{},geometry:{type:'Point',coordinates:perp(s.ll,s.b,b.lane*.06)}}});map.getSource('barrels').setData({type:'FeatureCollection',features:f})}
+function startRide(from){G.mode='ride';G.pd=from||0;G.v=0;G.lane=0;G.pres=100;G.dwell=2.5;G.ended=false;G.paused=false;G.got=0;G.nk=1;while(G.nk<R.cps.length&&R.cpD[G.nk]<=G.pd+1)G.nk++;
+ setBarrels();$('#rm').hidden=true;$('#rf').hidden=false;card.hidden=true;window.flowSpeed=2;Aud.scene(R.at(G.pd).part.kind=='sea'?'sea':'field');
+ if(mapOK&&curLayer=='pol')setLayer('sat');showNode(R.cps[Math.max(0,G.nk-1)][0]);tanker.show=false}
+function startRideAt(id){for(const r of Object.values(ROUTES)){const i=r.cps.findIndex(c=>c[0]==id);if(i>=0){selRoute(r.id);startRide(r.cpD[i]);return}}selRoute(R.id);startRide(0)}
+function exitRide(){G.mode='map';rider&&(rider.getElement().style.display='none');$('#rm').hidden=false;$('#rf').hidden=true;card.hidden=true;tanker.show=false;window.flowSpeed=1;Aud.scene('global');
+ mapOK&&map.getSource('barrels').setData({type:'FeatureCollection',features:[]});mapOK&&map.getSource('prog').setData({type:'FeatureCollection',features:[]});fitRoute()}
+function arrive(k){const id=R.cps[k][0];G.dwell=2.6;visited[id]=1;markVisited(id);addScore(10);
+ if(R.id=='cpc'&&id=='term')ok(1);if(R.id=='btc'&&id=='ceyhan')ok(3);
+ if(k==R.cps.length-1){G.ended=true;G.pd=R.len;showHTML('<span class="b bf">JOURNEY COMPLETE</span><h3>'+R.name+'</h3><p>'+R.end+'</p>');Aud.scene('dest');return}
+ showNode(id);
+ if(id=='spm'||id=='sang'&&0){G.sceneHold=true;openScene('terminal',{auto:true,onEnd:()=>{G.sceneHold=false;Aud.scene('sea')}})}}
+function rideStep(dt){if(G.paused||G.sceneHold)return;
+ if(G.dwell>0)G.dwell-=dt;const base=R.len/85;
+ const tv=G.dwell>0||G.ended?0:G.key.s?base*.3:G.key.b&&G.pres>3?base*2.6:base;G.v+=(tv-G.v)*Math.min(1,dt*3);G.pd=Math.min(R.len,G.pd+G.v*dt);
+ G.pres=Math.max(0,Math.min(100,G.pres+(G.key.b&&G.v>base*1.3?-26:14)*dt));G.lane=Math.max(-1.1,Math.min(1.1,G.lane+(G.key.r-G.key.l)*dt*2.2));
+ while(G.nk<R.cps.length&&G.pd>=R.cpD[G.nk]-.5){arrive(G.nk);G.nk++}
+ let hit=0;G.barrels.forEach(b=>{if(!b.got&&Math.abs(G.pd-b.d)<R.len/150&&Math.abs(G.lane-b.lane)<.55&&R.at(b.d).part.kind!='sea'){b.got=1;G.got++;addScore(10);hit=1;say('🛢 +10');if(G.got>=12)ok(4)}});if(hit)drawBarrels();
+ const s=R.at(G.pd),k=s.part.kind;tanker.show=k=='sea';tanker.ll=s.ll;tanker.b=s.b;
+ follow(s.ll,s.b,k=='sea'?6.2:7.2,62,dt);Aud.speed(G.v/base);window.flowSpeed=1+G.v/base;
+ const ds=Math.round(G.v*3600/ (R.len/R.len)/ (R.len/85)*0+G.v*3.6*1.2);
+ $('#pb').style.width=G.pres+'%';setStage(stageOf(R,G.pd));
+ const dn=hav(R.at(0).ll,R.at(0).ll);
+ $('#stats').innerHTML='<em>'+R.short+'</em> · checkpoint '+Math.min(G.nk,R.cps.length)+'/'+R.cps.length+' · '+(k=='sea'?'🚢 tanker (SIMULATION speed)':'🛢 oil in pipe (SIMULATION speed)')+'<br>Progress <em>'+Math.round(G.pd/R.len*100)+'%</em> · distance ≈ <em>'+Math.round(G.pd)+' / '+Math.round(R.len)+' km</em> (schematic) · barrels <em>'+G.got+'</em> · '+R.costNote+'<br>Steer ◀ ▶ · BOOST uses pressure · BRAKE slows';
+ const sl=R.at(Math.max(0,G.pd-R.len*.03));map.getSource('prog').setData({type:'Feature',properties:{},geometry:{type:'LineString',coordinates:sliceLine(R,0,G.pd)}});
+ placeRider(s.ll,s.b,k)}
+function sliceLine(r,a,b){const out=[r.at(a).ll];const n=Math.max(2,Math.ceil((b-a)/8));for(let i=1;i<=n;i++)out.push(r.at(a+(b-a)*i/n).ll);return out}
+let rider;function placeRider(ll,b,k){if(!rider){const e=document.createElement('div');e.style.cssText='font-size:26px;filter:drop-shadow(0 0 8px #0ea5e9);transition:none';e.textContent='🛢';rider=new maplibregl.Marker({element:e}).setLngLat(ll).addTo(map)}
+ rider.getElement().style.display=G.mode=='ride'&&k!='sea'?'block':'none';rider.setLngLat(perp(ll,b,G.lane*.06))}
+/* camera follow with smoothing */
+let sb=0;function follow(ll,b,z,pitch,dt){if(!mapOK)return;let d=((b-sb+540)%360)-180;sb+=d*Math.min(1,dt*2.2);const c=map.getCenter(),k=Math.min(1,dt*5);
+ const a=perp(ll,sb,0);map.jumpTo({center:[c.lng+(a[0]-c.lng)*k,c.lat+(a[1]-c.lat)*k],zoom:map.getZoom()+(z-map.getZoom())*Math.min(1,dt*2),pitch:pitch,bearing:sb})}
+/* ===== Journey (60 s) ===== */
+const J={on:false,t:0,i:-1,paused:false,total:60};
+const JS=[
+ {t:0,e(){selRoute('cpc');setLayer('sat');tanker.show=false;setStage(0);Aud.scene('field');showNode('tengiz');map.flyTo({center:NODES.tengiz.ll,zoom:12.6,pitch:62,bearing:-25,duration:6500})}},
+ {t:8,e(){setStage(1);Aud.scene('process');openScene('complex',{cam:'plant',auto:true,jr:true});showNode('plant')}},
+ {t:16,e(){closeScene(true);setStage(2);Aud.scene('field');card.hidden=true;J.d0=0;J.d1=R.cpD[R.cps.findIndex(c=>c[0]=='term')];J.ts=16;J.te=22;showHTML('<span class="b bf">PIPELINE</span><h3>Into the CPC pipeline</h3><p>Oil leaves Tengiz westward through Atyrau and Russia to the Black Sea (route SCHEMATIC).</p>')},
+  u(t){const p=(t-16)/6,d=J.d1*Math.min(1,p);const s=R.at(d);follow(s.ll,s.b,6.8,60,.05);map.getSource('prog').setData({type:'Feature',properties:{},geometry:{type:'LineString',coordinates:sliceLine(R,0,d)}});setStage(p<.15?2:3)}},
+ {t:22,e(){setStage(3);openScene('pipeline',{auto:true,jr:true})}},
+ {t:28,e(){closeScene(true);setStage(4);card.hidden=true;map.flyTo({center:NODES.term.ll,zoom:12.2,pitch:58,bearing:30,duration:3500});showNode('term')}},
+ {t:31,e(){setStage(5);openScene('terminal',{auto:true,jr:true})}},
+ {t:38,e(){closeScene(true);setStage(6);card.hidden=true;J.ts=38;Aud.scene('sea');tanker.show=true;showHTML('<span class="b bf">SEA</span><h3>Black Sea → Bosphorus</h3><p>The loaded tanker sails to the Turkish straits. (Sea lane SCHEMATIC.)</p>')},
+  u(t){const p=Math.min(1,(t-38)/10),a=R.parts[0].line.len,d=a+(R.cpD[R.cps.findIndex(c=>c[0]=='bosph')]-a)*p;const s=R.at(d);tanker.ll=s.ll;tanker.b=s.b;follow(s.ll,s.b,7.4,62,.05)}},
+ {t:48,e(){tanker.show=false;openScene('tanker',{auto:true,jr:true})}},
+ {t:54,e(){closeScene(true);setStage(7);Aud.scene('dest');tanker.show=false;card.hidden=true;map.flyTo({center:NODES.dest.ll,zoom:5.4,pitch:35,bearing:0,duration:4000});showNode('dest');addScore(50)}}];
+function startJourney(){if(!mapOK)return;J.on=true;J.t=0;J.i=-1;J.paused=false;G.mode='journey';$('#jc').style.display='flex';$('#rm').hidden=true;card.hidden=true;Aud.start();$('#jp').textContent='❚❚ Pause';setBarrelsOff()}
+function setBarrelsOff(){map.getSource('barrels').setData({type:'FeatureCollection',features:[]})}
+function endJourney(){J.on=false;G.mode='map';$('#jc').style.display='none';$('#rm').hidden=false;closeScene(true);tanker.show=false;Aud.scene('global');card.hidden=true;fitRoute();say('Journey complete ★ +50')}
+function jumpTo(i){J.i=i-1;J.t=JS[i].t}
+$('#jp').onclick=()=>{J.paused=!J.paused;$('#jp').textContent=J.paused?'▶ Play':'❚❚ Pause';Aud.pause(J.paused)};
+$('#jr').onclick=()=>{startJourney()};
+$('#js').onclick=()=>{const n=JS.findIndex(s=>s.t>J.t);if(n<0)endJourney();else jumpTo(n)};
+$('#jx').onclick=endJourney;
+function journeyStep(dt){if(!J.on||J.paused)return;J.t+=dt;
+ for(let i=J.i+1;i<JS.length&&JS[i].t<=J.t;i++){J.i=i;JS[i].e()}
+ const s=JS[J.i];if(s&&s.u)s.u(J.t);$('#pb').style.width=J.t/J.total*100+'%';
+ $('#stats').innerHTML='<em>Oil Journey</em> · '+Math.round(J.t)+' / '+J.total+' s · '+STAGES[stageIdxNow()]+' · SCHEMATIC route';
+ if(J.t>=J.total)endJourney()}
+let _st=0;function setStageHook(){}const _ss=setStage;setStage=function(i){_st=i;_ss(i)};function stageIdxNow(){return _st}
+/* ===== views ===== */
+function setView(v){$$('#views button').forEach(b=>b.classList.toggle('on',b.dataset.v==v));if(J.on)endJourney();if(G.mode=='ride')exitRide();closeScene(true);
+ if(v=='global'){setLayer('sat');mapOK&&map.flyTo({center:[44,43.5],zoom:3.7,pitch:0,bearing:0,duration:2500});Aud.scene('global')}
+ else if(v=='industrial'){setLayer('ind');flyNode('tengiz');Aud.scene('field');showNode('plant')}
+ else if(v=='pipeline'){openScene('pipeline',{})}
+ else if(v=='tanker'){openScene('tanker',{})}
+ else if(v=='journey'){startJourney()}}
+/* ===== main tick ===== */
+let lastT=0;function tick(t){const dt=Math.min(.1,(t-lastT)/1000||0);lastT=t;
+ if(mapOK){if(G.mode=='ride')rideStep(dt);else if(G.mode=='journey')journeyStep(dt)}
+ if(typeof Scn!=='undefined')Scn.frame(dt);
+ requestAnimationFrame(tick)}
+/* controls */
+function hold(id,k){const e=$(id);e.onpointerdown=ev=>{ev.preventDefault();G.key[k]=1};e.onpointerup=e.onpointerleave=e.onpointercancel=()=>G.key[k]=0}
+hold('#bl','l');hold('#br','r');hold('#bb','s');hold('#bo','b');
+const KM={ArrowLeft:'l',a:'l',ArrowRight:'r',d:'r',ArrowUp:'b',w:'b',' ':'b',ArrowDown:'s',s:'s'};
+addEventListener('keydown',e=>{if(G.mode=='ride'&&KM[e.key]){G.key[KM[e.key]]=1;e.preventDefault()}});addEventListener('keyup',e=>{if(KM[e.key])G.key[KM[e.key]]=0});
+$('#pa').onclick=()=>{G.paused=!G.paused;$('#pa').textContent=G.paused?'▶':'❚❚'};$('#ex').onclick=exitRide;
+/* swipe steering on map during ride */
+let px=null;addEventListener('pointermove',e=>{if(G.mode=='ride'&&e.pressure>0&&e.target.closest&&e.target.closest('#map')&&px!=null)G.lane=Math.max(-1.1,Math.min(1.1,G.lane+(e.clientX-px)/110));px=e.clientX});
+/* ===== THREE: engine, water, sky, tanker ===== */
+const Q={low:false};
+const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
+const mat=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.7,metalness:.2},o||{}));
+function box(w,h,d,c,x,y,z,p){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(c));m.position.set(x,y,z);(p||null)&&p.add(m);return m}
+function cyl(rt,rb,h,c,x,y,z,p,seg){const m=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,seg||20),mat(c));m.position.set(x,y,z);p&&p.add(m);return m}
+/* sky dome */
+function makeSky(top,hor,sun){const m=new THREE.Mesh(new THREE.SphereGeometry(900,24,12),new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,
+ uniforms:{top:{value:new THREE.Color(top)},hor:{value:new THREE.Color(hor)},sun:{value:sun.clone().normalize()}},
+ vertexShader:'varying vec3 p;void main(){p=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+ fragmentShader:'uniform vec3 top,hor,sun;varying vec3 p;void main(){float h=clamp(p.y,0.,1.);vec3 c=mix(hor,top,pow(h,.55));float s=max(dot(normalize(p),sun),0.);c+=vec3(1.,.85,.6)*(pow(s,600.)*1.6+pow(s,12.)*.25);gl_FragColor=vec4(c,1.);}'}));return m}
+/* water */
+function makeWater(deep,shallow,amp,sun){const seg=Q.low?64:140;const g=new THREE.PlaneGeometry(1200,1200,seg,seg);g.rotateX(-Math.PI/2);
+ const u={t:{value:0},off:{value:new THREE.Vector2()},deep:{value:new THREE.Color(deep)},shallow:{value:new THREE.Color(shallow)},amp:{value:amp},sun:{value:sun.clone().normalize()},hor:{value:new THREE.Color(0xb9d4e8)}};
+ const m=new THREE.Mesh(g,new THREE.ShaderMaterial({uniforms:u,
+ vertexShader:'uniform float t,amp;uniform vec2 off;varying vec3 w;varying vec3 n;\nvoid W(vec2 p,vec2 d,float k,float a,float s,inout float h,inout vec2 g){float ph=dot(p,normalize(d))*k+t*s;h+=a*sin(ph);g+=a*k*cos(ph)*normalize(d);}\nvoid main(){vec2 p=position.xz+off;float h=0.;vec2 g=vec2(0.);W(p,vec2(1.,.3),.09,.9*amp,1.1,h,g);W(p,vec2(.4,1.),.17,.45*amp,1.6,h,g);W(p,vec2(-.7,.6),.31,.22*amp,2.2,h,g);W(p,vec2(.9,-.5),.55,.1*amp,3.1,h,g);vec3 q=position;q.y+=h;w=q;n=normalize(vec3(-g.x,1.,-g.y));gl_Position=projectionMatrix*modelViewMatrix*vec4(q,1.);}',
+ fragmentShader:'uniform vec3 deep,shallow,sun,hor;uniform float t;uniform vec2 off;varying vec3 w;varying vec3 n;\nvoid main(){vec2 p=w.xz+off;vec3 N=normalize(n+vec3(sin(p.x*1.7+t*2.)*.035+sin(p.y*2.3-t*1.6)*.03,0.,cos(p.y*1.9+t*1.8)*.035));vec3 V=normalize(cameraPosition-w);float f=pow(1.-max(dot(N,V),0.),4.)*.95+.04;vec3 Rr=reflect(-V,N);vec3 sky=mix(hor,vec3(.22,.46,.82),clamp(Rr.y*1.4,0.,1.));vec3 body=mix(deep,shallow,clamp(N.y*.5+.35+(w.y)*.12,0.,1.));float sp=pow(max(dot(Rr,normalize(sun)),0.),220.)*2.2;vec3 c=mix(body,sky,f)+vec3(1.,.9,.7)*sp;float cr=smoothstep(.55,1.2,w.y)*.18;c+=cr;float dist=length(w.xz-cameraPosition.xz);c=mix(c,hor,smoothstep(160.,620.,dist));gl_FragColor=vec4(c,1.);}'}));
+ m.userData.u=u;return m}
+/* tanker model (length 100, bow +x, waterline y=0 when position.y=-draft) */
+function makeTanker(){const G3=new THREE.Group(),S=new THREE.Shape();
+ S.moveTo(-50,-8);S.lineTo(30,-8);S.bezierCurveTo(42,-8,48,-4,52,0);S.bezierCurveTo(48,4,42,8,30,8);S.lineTo(-50,8);S.lineTo(-50,-8);
+ const ex=(d,c,y)=>{const m=new THREE.Mesh(new THREE.ExtrudeGeometry(S,{depth:d,bevelEnabled:false}),mat(c,{roughness:.55,metalness:.3}));m.rotation.x=-Math.PI/2;m.position.y=y;G3.add(m);return m};
+ ex(4.5,0x8a2424,0);ex(4.5,0x1b2433,4.5);
+ const deck=new THREE.Mesh(new THREE.ExtrudeGeometry(S,{depth:.3,bevelEnabled:false}),mat(0x4f5a52));deck.rotation.x=-Math.PI/2;deck.scale.set(.97,.9,1);deck.position.y=9;G3.add(deck);
+ box(14,11,15,0xf1f1ee,-40,14.5,0,G3);box(10,4,14,0xe8e8e4,-40,22,0,G3);box(5,3,19,0xdfe3e6,-39,25,0,G3);cyl(2,2.4,7,0x222a38,-46,23,0,G3);cyl(.4,.4,9,0xcccccc,-37,29,0,G3);
+ for(let i=0;i<7;i++){const x=-24+i*9;cyl(2.1,2.1,.8,0x3a4650,x,9.6,-4,G3);cyl(2.1,2.1,.8,0x3a4650,x,9.6,4,G3)}
+ const pp=cyl(.6,.6,72,0x94a3b8,2,10.4,0,G3);pp.rotation.z=Math.PI/2;
+ const pp2=cyl(.45,.45,72,0x3d7ea6,2,10.4,2.2,G3);pp2.rotation.z=Math.PI/2;
+ for(let i=0;i<3;i++){const x=6+i*10,c=cyl(.5,.5,10,0x94a3b8,x,10.4,0,G3);c.rotation.x=Math.PI/2}
+ cyl(.3,.3,12,0xcccccc,40,15,0,G3);box(3,.4,3,0x666,44,9.5,0,G3);
+ cyl(2.6,3,8,0x1e293b,-46,24,0,G3);cyl(2.7,2.7,1.4,0x0ea5e9,-46,26.5,0,G3);
+ box(.3,1.2,13,0x0b1220,-33,23,0,G3);box(.3,1.2,11,0x0b1220,-33.2,15.5,0,G3);cyl(.2,.2,9,0xdddddd,-39,32.5,0,G3);box(.4,.4,5,0xdddddd,-39,36,0,G3);
+ [-1,1].forEach(sd=>{box(1.6,1.6,1.6,0x475569,-8,10.6,sd*7.2,G3);cyl(.7,.9,9,0xe2e8f0,-8,14.6,sd*7.2,G3);const bm=box(.6,.6,16,0xe2e8f0,-8,20,sd*12,G3);bm.rotation.x=-sd*.5;cyl(.05,.05,8,0x222,-8,16,sd*18,G3);
+  box(72,.15,.15,0x94a3b8,-2,11.1,sd*7.7,G3);box(72,.15,.15,0x94a3b8,-2,10.3,sd*7.7,G3);for(let i=0;i<19;i++)box(.2,1.6,.2,0x94a3b8,-36+i*4,10.2,sd*7.7,G3);
+  box(8,2.2,3,0xea580c,-30,19,sd*9.2,G3)});
+ for(let i=0;i<3;i++)cyl(.5,.5,14,0x94a3b8,12+i*10,17,3,G3);
+ [[40,0],[44,3],[44,-3]].forEach(a=>{const w=cyl(1.1,1.1,2.6,0x334155,a[0],10.6,a[1],G3);w.rotation.x=Math.PI/2});
+ return G3}
+function wakeTex(){const c=document.createElement('canvas');c.width=64;c.height=256;const x=c.getContext('2d'),g=x.createLinearGradient(0,0,0,256);g.addColorStop(0,'rgba(255,255,255,.75)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.beginPath();x.moveTo(26,0);x.lineTo(38,0);x.lineTo(64,256);x.lineTo(0,256);x.fill();
+ for(let i=0;i<120;i++){x.fillStyle='rgba(255,255,255,'+Math.random()*.4+')';x.fillRect(Math.random()*64,Math.random()*256,2,2)}return new THREE.CanvasTexture(c)}
+function makeFoam(){const N=Q.low?120:340,g=new THREE.BufferGeometry(),pos=new Float32Array(N*3),col=new Float32Array(N*3),P=[];
+ const c=document.createElement('canvas');c.width=c.height=32;const x=c.getContext('2d'),gr=x.createRadialGradient(16,16,1,16,16,15);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=gr;x.fillRect(0,0,32,32);
+ for(let i=0;i<N;i++)P.push({l:Math.random(),b:i%3?0:1,sd:Math.random()<.5?-1:1,r:Math.random()});
+ g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('color',new THREE.BufferAttribute(col,3));
+ const pts=new THREE.Points(g,new THREE.PointsMaterial({size:4.2,map:new THREE.CanvasTexture(c),vertexColors:true,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,opacity:.7}));pts.frustumCulled=false;
+ return{pts,update(dt,amp,spd){dt=Math.min(dt,.05);P.forEach((p,i)=>{p.l+=dt*(p.b?.16:.28);if(p.l>1){p.l=0;p.sd=Math.random()<.5?-1:1;p.r=Math.random()}
+  const l=p.l;let X,Z;if(p.b===0){X=92-l*(40+p.r*50);Z=p.sd*(1.5+l*(14+p.r*10))}else{X=-88-l*(60+p.r*60);Z=p.sd*(3+p.r*7)*(1+l*1.4)}
+  pos[i*3]=X;pos[i*3+1]=.5+l*.9*(1+amp)+p.r*.6;pos[i*3+2]=Z;const f=Math.sin(l*Math.PI)*(.55+.4*p.r);col[i*3]=col[i*3+1]=col[i*3+2]=f});
+  g.attributes.position.needsUpdate=true;g.attributes.color.needsUpdate=true}}}
+function makeWake(){const m=new THREE.Mesh(new THREE.PlaneGeometry(26,150),new THREE.MeshBasicMaterial({map:wakeTex(),transparent:true,depthWrite:false,opacity:.55}));m.rotation.x=-Math.PI/2;m.rotation.z=Math.PI/2;m.position.set(-125,.35,0);return m}
+/* tanker on the map (MapLibre custom layer, reuses the same GL context) */
+const AMB=[{r:'cpc',s:1,o:.2,v:.00004},{r:'cpc',s:1,o:.62,v:.00003},{r:'btc',s:3,o:.4,v:.00004}];
+const tankerLayer={id:'tanker3d',type:'custom',renderingMode:'3d',
+ onAdd(m,gl){this.m=m;this.cam=new THREE.Camera();this.sc=new THREE.Scene();this.sc.add(new THREE.AmbientLight(0xffffff,.75));const d=new THREE.DirectionalLight(0xffffff,.9);d.position.set(60,-40,120);this.sc.add(d);
+  this.model=makeTanker();this.model.position.y=-3;this.h=new THREE.Group();this.h.add(this.model);this.sc.add(this.h);
+  this.r=new THREE.WebGLRenderer({canvas:m.getCanvas(),context:gl,antialias:true});this.r.autoClear=false},
+ render(gl,matrix){const ships=[];if(tanker.show)ships.push([tanker.ll,tanker.b]);
+  if(this.m.getZoom()>4.2&&this.m.getZoom()<13&&G.mode!='ride'){const t=performance.now();AMB.forEach(a=>{const r=ROUTES[a.r],p=r.parts[a.s];if(!p)return;const f=(a.o+t*a.v/1000)%1,s=p.line.at(p.line.len*f);ships.push([s.ll,s.b])})}
+  if(!ships.length)return;const z=this.m.getZoom(),len=Math.max(30,Math.min(70,48))/(512*Math.pow(2,z));const m4=new THREE.Matrix4().fromArray(matrix);
+  for(const[ll,b]of ships){const mc=maplibregl.MercatorCoordinate.fromLngLat(ll,0),s=len/100;
+   const l=new THREE.Matrix4().makeTranslation(mc.x,mc.y,0).scale(V3(s,-s,s)).multiply(new THREE.Matrix4().makeRotationX(Math.PI/2)).multiply(new THREE.Matrix4().makeRotationY((90-b)*D2R));
+   this.cam.projectionMatrix=m4.clone().multiply(l);this.r.resetState();this.r.render(this.sc,this.cam)}
+  this.m.triggerRepaint()}};
+/* ===== SCENE CONTROLLER ===== */
+const SB={};
+const Scn={r:null,cur:null,name:null,t:0,o:{},S:{},labels:[],
+ init(){if(this.r)return;this.r=new THREE.WebGLRenderer({canvas:$('#three'),antialias:!Q.low,powerPreference:'high-performance'});this.r.localClippingEnabled=true;this.size();addEventListener('resize',()=>this.size())},
+ size(){if(!this.r)return;this.r.setPixelRatio(Q.low?1:Math.min(devicePixelRatio||1,2));this.r.setSize(innerWidth,innerHeight,false);for(const s of Object.values(this.S)){s.cam.aspect=innerWidth/innerHeight;s.cam.updateProjectionMatrix()}},
+ open(n,o){this.init();this.close(true);try{if(!this.S[n])this.S[n]=SB[n]()}catch(e){say('3D scene unavailable: '+e.message);return}
+  this.cur=this.S[n];this.name=n;this.t=0;this.o=o||{};this.size();$('#three').style.display='block';$('#hud').style.display='block';
+  const sc=this.cur;sc.enter&&sc.enter(this.o);this.setLabels(sc.labels||[]);if(!this.o.jr)document.body.classList.add('inscene')},
+ setHud(h,close){$('#hudt').innerHTML=h+(close?' <button id="scx" style="pointer-events:auto;padding:3px 9px;margin-left:8px">✕ Close</button>':'');const b=$('#scx');if(b)b.onclick=()=>{closeScene();};$$('#hudt button').forEach(x=>x.style.pointerEvents='auto')},
+ setLabels(l){this.labels.forEach(x=>x.el.remove());this.labels=l.map(x=>{const el=document.createElement('div');el.className='lbl';el.textContent=x.t;document.body.appendChild(el);return{el,p:x.p}})},
+ close(silent){if(!this.cur)return;this.cur.leave&&this.cur.leave();this.cur=null;this.name=null;this.setLabels([]);$('#three').style.display='none';$('#hud').style.display='none';document.body.classList.remove('inscene')},
+ frame(dt){if(!this.cur)return;this.t+=dt;this.cur.update(this.t,dt);this.r.render(this.cur.scene,this.cur.cam);
+  const w=innerWidth,h=innerHeight;for(const l of this.labels){const v=l.p.clone().project(this.cur.cam);const on=v.z<1&&Math.abs(v.x)<1.1&&Math.abs(v.y)<1.1;l.el.style.display=on?'block':'none';if(on){l.el.style.left=(v.x*.5+.5)*w+'px';l.el.style.top=(-v.y*.5+.5)*h+'px'}}
+  if(this.o.dur&&this.t>this.o.dur){const f=this.o.onEnd;this.o.dur=0;closeScene();f&&f()}}};
+const Scene=(bg)=>{const s=new THREE.Scene();s.background=new THREE.Color(bg);return s};
+function openScene(n,o){o=o||{};Scn.open(n,o)}
+function closeScene(silent){const had=Scn.cur;Scn.close(silent);if(had&&!silent&&G.mode=='map')Aud.scene('global')}
+function lights(s,sun){s.add(new THREE.HemisphereLight(0xcfe3ff,0x6a5a3a,.8));const d=new THREE.DirectionalLight(0xfff0d0,1.15);d.position.copy(sun);s.add(d)}
+/* flow dots along a curve */
+function flowDots(parent,curve,n,col,r){const g=[],m=new THREE.MeshBasicMaterial({color:col});for(let i=0;i<n;i++){const d=new THREE.Mesh(new THREE.SphereGeometry(r,8,8),m);parent.add(d);g.push(d)}return{update(t,sp){g.forEach((d,i)=>d.position.copy(curve.getPoint(((t*(sp||.12)+i/n)%1+1)%1)))}}}
+function tube(pts,r,c,parent,seg){const cu=new THREE.CatmullRomCurve3(pts,false,'catmullrom',.1),m=new THREE.Mesh(new THREE.TubeGeometry(cu,seg||40,r,10,false),mat(c));parent&&parent.add(m);return{cu,m}}
+function flameSprite(){const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d'),g=x.createRadialGradient(32,40,2,32,36,30);g.addColorStop(0,'rgba(255,250,200,1)');g.addColorStop(.35,'rgba(255,170,40,.9)');g.addColorStop(1,'rgba(255,80,0,0)');x.fillStyle=g;x.fillRect(0,0,64,64);
+ const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),blending:THREE.AdditiveBlending,depthWrite:false}));s.scale.set(14,22,1);return s}
+/* ===== INDUSTRIAL COMPLEX (conceptual) ===== */
+const ZONES={wells:{n:'Production wells',x:-130,z:20,note:'Wellheads bring crude and associated gas to the surface.'},oil:{n:'Oil treatment',x:-40,z:10,note:'Separators remove gas and water from the crude.'},gas:{n:'Gas processing',x:50,z:0,note:'Sour gas is treated; sulfur is recovered.'},sulfur:{n:'Sulfur handling',x:130,z:-30,note:'Recovered sulfur is formed and stored in blocks.'},tanks:{n:'Tanks & export header',x:60,z:80,note:'Treated crude goes to storage, then into the export pipeline.'}};
+SB.complex=()=>{const s=Scene(0xcfe0ee);s.fog=new THREE.Fog(0xcfe0ee,350,1000);lights(s,V3(200,300,120));s.add(makeSky(0x2f6fb5,0xcfe0ee,V3(.5,.6,.3)));
+ const gd=new THREE.Mesh(new THREE.PlaneGeometry(2000,2000),mat(0xb9a273,{roughness:1}));gd.rotation.x=-Math.PI/2;s.add(gd);
+ const cam=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,1,2500);const flows=[];const labels=[];
+ // wells
+ for(let i=0;i<7;i++){const x=-150+(i%4)*24,z=-10+Math.floor(i/4)*36+(i%2)*8;cyl(1.6,2,3,0x2e4a2e,x,1.5,z,s);box(.8,6,.8,0x2a2a2a,x,5,z,s);const a=box(6,.8,.8,0x2a2a2a,x,6.5,z,s);box(10,.2,10,0x777777,x,.1,z,s)}
+ const wp=tube([V3(-130,1,10),V3(-100,1,15),V3(-70,1,12),V3(-45,2,10)],1,0x3b3b3b,s);flows.push(flowDots(s,wp.cu,8,0x1a0f05,1.2));
+ // oil treatment: horizontal vessels
+ for(let i=0;i<4;i++){const v=cyl(5,5,34,0x6e7f8c,-45+i*0,6,-8+i*12,s);v.rotation.z=Math.PI/2;box(36,1,6,0x555555,-45,.5,-8+i*12,s)}
+ const ot=tube([V3(-45,2,10),V3(-10,2,6),V3(20,2,2),V3(45,2,0)],1,0x3b3b3b,s);flows.push(flowDots(s,ot.cu,8,0x1a0f05,1.2));
+ // gas processing: columns + modules + pipe rack
+ for(let i=0;i<4;i++){cyl(4,4,38+i*6,0xc7ccd1,35+i*14,20+i*3,-15,s);cyl(4.4,4.4,1,0x555,35+i*14,36+i*6,-15,s)}
+ box(60,8,14,0x8c97a0,55,4,14,s);box(40,4,10,0xa8b2b9,60,2,-30,s);
+ for(let i=0;i<5;i++)tube([V3(30+i*10,10,-12),V3(32+i*10,10,10)],.8,0x444,s);
+ // flare
+ cyl(.9,1.4,70,0x555,30,35,-70,s,10);const fl=flameSprite();fl.position.set(30,74,-70);s.add(fl);
+ // sulfur blocks (yellow)
+ for(let i=0;i<24;i++)box(14,5+(i%3),14,i%2?0x38bdf8:0xd4b414,105+(i%6)*16,3,-60+Math.floor(i/6)*16,s);
+ // tank farm
+ for(let i=0;i<6;i++){const x=20+(i%3)*30,z=60+Math.floor(i/3)*32;cyl(12,12,14,0xf4f4f0,x,7,z,s,32);cyl(11.5,11.5,.6,0xbdbdbd,x,13.8,z,s,32)}
+ const ex=tube([V3(45,2,0),V3(90,2,30),V3(170,2,60),V3(260,2,70)],1.4,0x2a2a2a,s);flows.push(flowDots(s,ex.cu,10,0x0ea5e9,1.7));
+ box(40,.05,3,0x555555,0,.2,-60,s); // road
+ const trucks=[];for(let i=0;i<3;i++){const tg=new THREE.Group();box(6,3,3,i%2?0xdddddd:0x0ea5e9,0,2,0,tg);tg.position.set(-150+i*120,.5,-60);s.add(tg);trucks.push(tg)}
+ Object.entries(ZONES).forEach(([k,z])=>labels.push({t:z.n,p:V3(z.x,24,z.z)}));
+ labels.push({t:'Flare (conceptual)',p:V3(30,82,-70)});labels.push({t:'→ CPC export pipeline',p:V3(230,8,70)});
+ const views={wells:[V3(-170,38,70),V3(-130,0,20)],oil:[V3(-70,40,70),V3(-40,4,6)],gas:[V3(10,50,70),V3(50,14,0)],sulfur:[V3(100,45,40),V3(130,4,-35)],tanks:[V3(60,55,160),V3(60,6,75)],wide:[V3(-60,130,230),V3(40,5,10)]};
+ const seq=['wells','oil','gas','sulfur','tanks'];let vi='wide',tgt=V3(),pos=V3(),cur='wide';
+ const sc={scene:s,cam,labels,
+  enter(o){cam.position.copy(views.wide[0]);pos.copy(views.wide[0]);tgt.copy(views.wide[1]);cur=o.cam=='plant'?'seq':'wide';if(o.auto)o.dur=7.4;
+   Aud.scene(o.cam=='plant'?'process':'field');
+   Scn.setHud('<b>Tengiz complex</b> · CONCEPTUAL ILLUSTRATION — not the real layout<div class="row" style="margin-top:6px;pointer-events:auto"><button data-z="wide">Overview</button>'+Object.entries(ZONES).map(([k,z])=>'<button data-z="'+k+'">'+z.n+'</button>').join('')+'</div>',!o.jr);
+   $$('#hudt [data-z]').forEach(b=>b.onclick=()=>{cur=b.dataset.z});},
+  update(t,dt){fl.scale.set(12+Math.sin(t*25)*2.5,22+Math.sin(t*17)*5,1);fl.position.y=74+Math.sin(t*9)*1;
+   flows.forEach(f=>f.update(t,.1));trucks.forEach((k,i)=>{k.position.x=((k.position.x+dt*(10+i*3)+300)%420)-210});
+   let key=cur;if(cur=='seq')key=seq[Math.min(seq.length-1,Math.floor(t/1.5))];
+   const v=views[key]||views.wide,k=1-Math.exp(-dt*2.2);let p=v[0].clone();if(key=='wide'){const a=t*.12;p=V3(Math.sin(a)*240,130,Math.cos(a)*240+30)}
+   pos.lerp(p,k);tgt.lerp(v[1],k);cam.position.copy(pos);cam.lookAt(tgt);if(key!=cur&&cur=='seq'||1)Aud.dist&&Aud.dist(Math.min(1,pos.distanceTo(tgt)/260))}};
+ return sc};
+/* ===== PIPELINE CUTAWAY ===== */
+SB.pipeline=()=>{const s=Scene(0x9db7c8);s.fog=new THREE.Fog(0xa9c0cf,80,520);lights(s,V3(150,200,80));s.add(makeSky(0x3a74b8,0xc3d4df,V3(.4,.5,.3)));
+ const gd=new THREE.Mesh(new THREE.PlaneGeometry(3000,3000),mat(0x8d8458,{roughness:1}));gd.rotation.x=-Math.PI/2;s.add(gd);
+ const cam=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.3,2500);
+ const pts=[];for(let i=0;i<=30;i++)pts.push(V3(i*28-100,3,Math.sin(i*.45)*45+Math.sin(i*.17)*30));
+ const cu=new THREE.CatmullRomCurve3(pts),len=cu.getLength();
+ const clipS=new THREE.Plane(V3(0,-1,0),4.6),clipO=new THREE.Plane(V3(0,-1,0),4.0);
+ const steel=new THREE.Mesh(new THREE.TubeGeometry(cu,400,3.1,20,false),new THREE.MeshStandardMaterial({color:0x7d858c,metalness:.8,roughness:.35,side:THREE.DoubleSide,clippingPlanes:[clipS]}));s.add(steel);
+ const wl=new THREE.Mesh(new THREE.TubeGeometry(cu,400,3.35,20,false),new THREE.MeshStandardMaterial({color:0x1f2933,metalness:.3,roughness:.9,side:THREE.DoubleSide,clippingPlanes:[clipS]}));s.add(wl);
+ const wm=new THREE.MeshStandardMaterial({color:0x5b636a,metalness:.7,roughness:.5,clippingPlanes:[clipS]}),wg=new THREE.TorusGeometry(3.2,.2,6,28);
+ for(let i=0;i<80;i++){const u=i/80,p=cu.getPoint(u),tg=cu.getTangent(u),m=new THREE.Mesh(wg,wm);m.position.copy(p);m.quaternion.setFromUnitVectors(V3(0,0,1),tg);s.add(m)}
+ const U={t:{value:0},sp:{value:1}};
+ const oil=new THREE.Mesh(new THREE.TubeGeometry(cu,400,2.7,20,false),new THREE.ShaderMaterial({uniforms:U,side:THREE.DoubleSide,clipping:true,clippingPlanes:[clipO],
+  vertexShader:'varying vec2 vu;varying vec3 vn;varying vec3 vw;\n#include <clipping_planes_pars_vertex>\nvoid main(){vu=uv;vn=normalMatrix*normal;vw=(modelMatrix*vec4(position,1.)).xyz;\n#include <begin_vertex>\n#include <project_vertex>\n#include <clipping_planes_vertex>\n}',
+  fragmentShader:'uniform float t,sp;varying vec2 vu;varying vec3 vn;varying vec3 vw;\n#include <clipping_planes_pars_fragment>\nfloat h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5);}float nz(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}\nvoid main(){\n#include <clipping_planes_fragment>\nvec2 p=vec2(vu.x*260.-t*sp*14.+sin(vu.y*12.57+t*sp*3.)*2.5,vu.y*18.+sin(vu.x*39.-t*sp*5.)*1.3);float n=nz(p*vec2(.35,1.))*.55+nz(p*vec2(.9,2.3)+7.)*.3+nz(p*3.)*.15;vec3 c=mix(vec3(.025,.016,.01),vec3(.16,.09,.035),n);float sh=pow(n,3.)*.5;c+=vec3(.5,.3,.12)*sh*.4;vec3 N=normalize(vn);float f=pow(1.-abs(N.z),2.)*.12;float sw=pow(nz(p*vec2(.5,4.)+t*sp*.6),5.)*.5;c+=vec3(.55,.4,.22)*sw*(.4+.25*sp);c*=.85+.12*min(sp,3.);gl_FragColor=vec4(c+f*vec3(.5,.35,.2),1.);}'}));s.add(oil);
+ // supports + pump stations
+ for(let i=0;i<60;i++){const p=cu.getPoint(i/60);box(5,3,3,0x56524a,p.x,1.4,p.z,s)}
+ const pumps=[.33,.68];const lab=[];pumps.forEach(u=>{const p=cu.getPoint(u),tg=cu.getTangent(u),a=Math.atan2(-tg.z,tg.x);const g=new THREE.Group();g.position.copy(p);g.rotation.y=a;s.add(g);
+  const r=new THREE.Mesh(new THREE.TorusGeometry(3.6,.8,10,24),mat(0x2f5aa8));r.rotation.y=Math.PI/2;r.position.set(-5,0,0);g.add(r);const r2=r.clone();r2.position.x=5;g.add(r2);box(10,6,6,0x2f5aa8,0,-.5,12,g);cyl(1.6,1.6,8,0x9aa5ad,0,3,12,g);box(14,.4,3,0x666,0,-1.4,6,g);lab.push({t:'Pump station (conceptual)',p:p.clone().add(V3(0,9,0))})});
+ // direction arrows
+ const arr=[];for(let i=0;i<22;i++){const a=new THREE.Mesh(new THREE.ConeGeometry(.7,2.2,8),new THREE.MeshBasicMaterial({color:0x0ea5e9}));a.rotation.z=-Math.PI/2;s.add(a);arr.push(a)}
+ // bubbles
+ const bub=[];for(let i=0;i<80;i++){const b=new THREE.Mesh(new THREE.SphereGeometry(.2,8,8),new THREE.MeshBasicMaterial({color:0xcaa46a,transparent:true,opacity:.6}));s.add(b);b.scale.setScalar(.5+Math.random()*1.5);bub.push({b,u:Math.random(),o:(Math.random()-.5)*3.6,y:Math.random()*1.5})}
+ let prog=0,spd=1,fx=0;const sc={scene:s,cam,labels:lab.map(l=>l),
+  enter(o){prog=.02;spd=1;if(o.auto)o.dur=7.4;Aud.scene('pipeline');
+   Scn.setHud('<b>PIPELINE VIEW</b> · oil flows INSIDE the pipe · cutaway · <span class="b bs">SCHEMATIC</span><div class="row" style="margin-top:6px"><button id="ps1">◀ Slower</button><button id="ps2">Faster ▶</button><button id="ps3">Stop / Go</button></div>',!o.jr);
+   const o2=Scn.o;$('#ps1')&&($('#ps1').onclick=()=>spd=Math.max(0,spd-.5));$('#ps2')&&($('#ps2').onclick=()=>spd=Math.min(5,spd+.5));$('#ps3')&&($('#ps3').onclick=()=>spd=spd?0:1)},
+  update(t,dt){const near=pumps.reduce((m,u)=>Math.min(m,Math.abs(prog-u)),1),boost=1+2.5*Math.max(0,1-near*18),sp=spd*boost;
+   U.t.value=t;U.sp.value=sp;prog+=dt*sp*.011;if(prog>.97)prog=.02;Aud.speed&&Aud.speed(sp/2);Aud.flow&&Aud.flow(sp);
+   const p=cu.getPoint(prog),q=cu.getPoint(Math.min(1,prog+.03)),tg=cu.getTangent(prog),side=V3(-tg.z,0,tg.x).normalize();
+   cam.position.copy(p).add(V3(0,9,0)).add(side.clone().multiplyScalar(-7)).add(tg.clone().multiplyScalar(-12));cam.lookAt(q.x,3,q.z);const vib=.02+.06*Math.max(0,1-near*18);cam.position.x+=Math.sin(t*61)*vib;cam.position.y+=Math.sin(t*47+1)*vib;cam.rotation.z+=Math.sin(t*53)*vib*.03;
+   fx+=dt*.05*sp;arr.forEach((a,i)=>{const u=(fx+i/22)%1,pp=cu.getPoint(u),tt=cu.getTangent(u);a.position.set(pp.x,6.4,pp.z);a.rotation.y=Math.atan2(-tt.z,tt.x)});
+   bub.forEach(b=>{b.u=(b.u+dt*.02*sp)%1;const pp=cu.getPoint(b.u),tt=cu.getTangent(b.u),sd=V3(-tt.z,0,tt.x).normalize();const w=Math.sin(t*2.5+b.o*9)*.35;b.b.position.set(pp.x+sd.x*(b.o+w),2+b.y*.8+Math.abs(Math.sin(t*1.7+b.u*30))*.5,pp.z+sd.z*(b.o+w))})}};
+ return sc};
+/* ===== MARINE TERMINAL (SPM loading) ===== */
+const SEAS={black:{n:'Black Sea',deep:0x0c3a4a,sh:0x2f7f86,amp:.7},med:{n:'Mediterranean',deep:0x063c73,sh:0x1b9ab8,amp:.5},caspian:{n:'Caspian Sea',deep:0x1c4a4f,sh:0x5b8f86,amp:.55}};
+const SUN=V3(.5,.42,.6);
+SB.terminal=()=>{const s=Scene(0xb9d4e8);s.fog=new THREE.Fog(0xb9d4e8,300,900);lights(s,V3(120,140,160));s.add(makeSky(0x3b7cc0,0xcfe0ee,SUN));
+ const W=makeWater(SEAS.black.deep,SEAS.black.sh,.3,SUN);s.add(W);const U=W.userData.u;
+ const cam=new THREE.PerspectiveCamera(52,innerWidth/innerHeight,.5,2500);
+ // coast + tank farm (CONCEPTUAL)
+ const land=box(900,6,260,0x9b8d62,-200,2,-330,s);for(let i=0;i<8;i++){const x=-420+(i%4)*45,z=-290+Math.floor(i/4)*50;cyl(17,17,18,0xf2f2ee,x,17,z,s,32)}
+ const hills=box(900,50,100,0x6d7b4f,-200,25,-480,s);
+ // SPM buoy
+ const B=new THREE.Group();s.add(B);cyl(7,8,5,0x0ea5e9,0,1,0,B,24);cyl(3,3,9,0xc62828,0,6,0,B);cyl(8.4,8.4,1.2,0x333,0,2.6,0,B,24);B.position.set(-30,0,0);
+ // tanker moored (bow towards buoy side)
+ const T=makeTanker();T.scale.setScalar(1.8);const TH=new THREE.Group();TH.add(T);s.add(TH);TH.position.set(88,0,0);TH.rotation.y=Math.PI;
+ // hose
+ const hc=new THREE.CatmullRomCurve3([V3(-30,5,0),V3(-24,.8,2),V3(-10,.6,5),V3(2,3,3),V3(8,11,0)]);
+ const hose=new THREE.Mesh(new THREE.TubeGeometry(hc,50,1,10,false),mat(0x161616,{roughness:.9}));s.add(hose);
+ const dots=flowDots(s,hc,14,0x0ea5e9,.75);
+ const mf=new THREE.Mesh(new THREE.TorusGeometry(1.4,.25,6,14),mat(0x0ea5e9));mf.position.set(8,11,0);s.add(mf);
+ // tugboat
+ const tug=new THREE.Group();box(14,3,5,0x2a5a9a,0,1.5,0,tug);box(5,3.5,4,0xffffff,-2,4.5,0,tug);tug.position.set(-60,0,40);s.add(tug);
+ let load=0,state='load';const labels=[{t:'Loading buoy (SPM, approx.)',p:V3(-30,14,0)},{t:'Floating hose',p:V3(-10,6,5)},{t:'Tank farm (conceptual)',p:V3(-350,40,-290)},{t:'Tanker',p:V3(88,34,0)}];
+ const sc={scene:s,cam,labels,
+  enter(o){load=0;state='load';TH.position.set(88,0,0);o.dur=o.auto?7.2:0;U.amp.value=SEAS.black.amp*.55;Aud.scene('terminal');
+   Scn.setHud('<b>CPC MARINE TERMINAL</b> · loading via offshore buoy · <span class="b bs">CONCEPTUAL ILLUSTRATION</span><div id="ld" style="margin-top:6px;font-size:12px"></div><div class="meter" style="margin-top:4px"><div id="ldb"></div></div>',!o.jr)},
+  update(t,dt){U.t.value=t;const rate=Scn.o.auto?1/6:1/16;
+   if(state=='load'){load=Math.min(1,load+dt*rate);if(load>=1){state='done';sc.t0=t}}
+   else if(state=='done'&&t-(sc.t0||0)>1.6&&!Scn.o.auto)state='depart';
+   const dr=3.2+load*2.8;T.position.y=-dr*1.0+Math.sin(t*.8)*.25;T.rotation.z=Math.sin(t*.7)*.015;T.rotation.x=Math.sin(t*.9)*.01;
+   B.position.y=Math.sin(t*1.1+1)*.25;B.rotation.z=Math.sin(t*.9)*.03;mf.position.y=11+Math.sin(t*.8)*.2;
+   if(state=='depart'){TH.position.x+=dt*(2+Math.max(0,t-sc.t0-3)*1.5);if(TH.position.x>400){state='load';load=0;TH.position.x=88}}
+   dots.update(state=='load'?t:0,.18);hose.visible=state!='depart';mf.visible=hose.visible;
+   const a=t*.08;cam.position.set(30+Math.sin(a)*110,18+Math.sin(t*.2)*3,95+Math.cos(a)*30);cam.lookAt(35,6,0);
+   tug.position.x=-60+Math.sin(t*.1)*10;tug.position.y=Math.sin(t*1.3)*.3;
+   const st=state=='load'?'LOADING '+Math.round(load*100)+'%':state=='done'?'LOADING COMPLETE ✔':'DEPARTING — voyage begins';$('#ld')&&($('#ld').textContent=st+' · volumes SIMULATION DATA');$('#ldb')&&($('#ldb').style.width=load*100+'%');
+   Aud.flow&&Aud.flow(state=='load'?1:0)}};
+ return sc};
+/* ===== TANKER VIEW (open sea) ===== */
+SB.tanker=()=>{const s=Scene(0xb9d4e8);s.fog=new THREE.Fog(0xcfe0ee,260,900);lights(s,V3(120,160,200));s.add(makeSky(0x2f6fb8,0xcfe0ee,SUN));
+ const W=makeWater(SEAS.black.deep,SEAS.black.sh,.7,SUN);s.add(W);const U=W.userData.u;
+ const cam=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,.5,2500);
+ const T=makeTanker();T.scale.setScalar(1.8);const TH=new THREE.Group();TH.add(T);s.add(TH);const wake=makeWake();wake.scale.set(1.8,1.8,1);T.add(wake);
+ const bow=new THREE.Mesh(new THREE.PlaneGeometry(26,18),new THREE.MeshBasicMaterial({map:wakeTex(),transparent:true,depthWrite:false,opacity:.45}));bow.rotation.x=-Math.PI/2;bow.rotation.z=-Math.PI/2;bow.position.set(54,.4,0);T.add(bow);const FO=makeFoam();TH.add(FO.pts);
+ let cm='chase',sea='black',turn=0,spd=1;
+ const setSea=k=>{sea=k;const c=SEAS[k];U.deep.value.set(c.deep);U.shallow.value.set(c.sh);U.amp.value=c.amp;$('#hudsea')&&($('#hudsea').textContent=c.n)};
+ const sc={scene:s,cam,labels:[],
+  enter(o){const r=R,sp=r.at(r.len*.5);setSea(Scn.o.sea||(G.mode=='journey'||(G.mode=='ride'&&tanker.show)?(R.id=='cpc'?'black':'caspian'):'black'));if(o.auto)o.dur=6.5;Aud.scene('tanker');
+   Scn.setHud('<b>TANKER VIEW</b> · <span id="hudsea"></span> · <span class="b bs">3D MODEL, SIMULATED WAVES</span><div class="row" style="margin-top:6px;pointer-events:auto">'+['chase','bow','orbit','wide','water'].map(c=>'<button data-c="'+c+'">'+c.toUpperCase()+'</button>').join('')+'</div><div class="row" style="margin-top:4px;pointer-events:auto">'+Object.entries(SEAS).map(([k,v])=>'<button data-s="'+k+'">'+v.n+'</button>').join('')+'</div>',!o.jr);
+   setSea(sea);$$('#hudt [data-c]').forEach(b=>b.onclick=()=>cm=b.dataset.c);$$('#hudt [data-s]').forEach(b=>b.onclick=()=>setSea(b.dataset.s))},
+  update(t,dt){U.t.value=t;U.off.value.x+=dt*14*spd;const amp=U.amp.value;
+   turn=Math.sin(t*.07)*.1;TH.rotation.y=turn;const PS=sc.ps||(sc.ps={h:0,r:0,p:0,vh:0,vr:0,vp:0}),d=Math.min(dt,.05);
+   const fh=Math.sin(t*.55)*.6+Math.sin(t*.9+2)*.25,fr=Math.sin(t*.42+1)*.035+Math.sin(t*.77)*.012+turn*.2,fp=Math.sin(t*.5+.6)*.02+Math.sin(t*.31)*.008;
+   const sp2=(x,v,tg,k,c)=>{v+=((tg-x)*k-v*c)*d;return[x+v*d,v]};
+   [PS.h,PS.vh]=sp2(PS.h,PS.vh,fh*amp,1.1,1.6);[PS.r,PS.vr]=sp2(PS.r,PS.vr,fr*amp,.9,1.3);[PS.p,PS.vp]=sp2(PS.p,PS.vp,fp*amp,.8,1.2);
+   T.position.y=-5+PS.h;T.rotation.x=PS.r;T.rotation.z=PS.p;FO.update(dt,amp,spd);
+   wake.material.opacity=.45+Math.sin(t*2)*.05;
+   const px=TH.position.x,pz=TH.position.z;
+   if(cm=='chase')cam.position.set(-150,45,38+Math.sin(t*.2)*8),cam.lookAt(10,8,0);
+   else if(cm=='bow')cam.position.set(110,26,-34),cam.lookAt(40,6,0);
+   else if(cm=='orbit'){const a=t*.22;cam.position.set(Math.cos(a)*190,38,Math.sin(a)*190);cam.lookAt(0,10,0)}
+   else if(cm=='wide')cam.position.set(-380,140,220),cam.lookAt(0,0,0);
+   else{const a=t*.1;cam.position.set(-40+Math.sin(a)*10,3.2,36);cam.lookAt(0,4,0)}
+   const cx=cam.position.length();Aud.water&&Aud.water(cm=='water'?1:Math.max(.25,1-cx/380))}};
+ return sc};
+/* ===== AUDIO: procedural Web Audio, no external files ===== */
+const Aud={ctx:null,on:true,cur:'global',L:{},vol:{master:.7,amb:.7,ind:.7,wat:.7,mus:.35},musicOn:true,ready:false,
+ MIX:{ // layer levels per scene
+  global:{wind:.3,hum:0,mach:0,pipe:0,port:0,waves:.12,engine:0,swind:0,mus:1},
+  field:{wind:.3,hum:.45,mach:.6,pipe:.12,port:0,waves:0,engine:0,swind:0,mus:.6},
+  process:{wind:.15,hum:.8,mach:.9,pipe:.2,port:0,waves:0,engine:0,swind:0,mus:.4},
+  pipeline:{wind:.05,hum:.2,mach:.2,pipe:1,port:0,waves:0,engine:0,swind:0,mus:.3},
+  terminal:{wind:.2,hum:.3,mach:.25,pipe:.15,port:1,waves:.5,engine:.2,swind:.2,mus:.3},
+  sea:{wind:0,hum:0,mach:0,pipe:0,port:0,waves:.6,engine:.4,swind:.6,mus:.5},
+  tanker:{wind:0,hum:0,mach:0,pipe:0,port:0,waves:.8,engine:.7,swind:.7,mus:.4},
+  dest:{wind:.1,hum:0,mach:0,pipe:0,port:0,waves:.3,engine:0,swind:.2,mus:1}},
+ BUS:{wind:'amb',hum:'ind',mach:'ind',pipe:'ind',port:'ind',waves:'wat',engine:'ind',swind:'amb',mus:'mus'},
+ build(){const C=this.ctx=new(window.AudioContext||window.webkitAudioContext)(),sr=C.sampleRate;
+  const nb=(brown)=>{const b=C.createBuffer(1,sr*3,sr),d=b.getChannelData(0);let l=0;for(let i=0;i<d.length;i++){const w=Math.random()*2-1;if(brown){l=(l+.02*w)/1.02;d[i]=l*3.5}else d[i]=w}return b};
+  const W=nb(0),Br=nb(1);
+  const mg=C.createGain();const cp=C.createDynamicsCompressor();cp.threshold.value=-20;cp.ratio.value=3;cp.attack.value=.02;cp.release.value=.3;mg.connect(cp);
+  const rv=C.createConvolver(),rb=C.createBuffer(2,sr*2.6,sr);for(let c=0;c<2;c++){const d=rb.getChannelData(c);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2.8)}rv.buffer=rb;const rg=C.createGain();rg.gain.value=.2;mg.connect(rv);rv.connect(rg);rg.connect(cp);cp.connect(C.destination);this.master=mg;
+  this.bus={};for(const k of['amb','ind','wat','mus']){const g=C.createGain();g.connect(k=='ind'?(this.indF=Object.assign(C.createBiquadFilter(),{type:'lowpass',frequency:5000})):mg);this.bus[k]=g}this.indF.connect(mg);
+  const noise=(buf,type,f,q)=>{const s=C.createBufferSource();s.buffer=buf;s.loop=true;const fl=C.createBiquadFilter();fl.type=type;fl.frequency.value=f;fl.Q.value=q||.7;s.connect(fl);s.start();return fl};
+  const lfo=(f,amt,target)=>{const o=C.createOscillator(),g=C.createGain();o.frequency.value=f;g.gain.value=amt;o.connect(g);g.connect(target);o.start();return o};
+  const layer=(name,out)=>{const g=C.createGain();g.gain.value=0;out.connect(g);g.connect(this.bus[this.BUS[name]]);this.L[name]=g;return g};
+  // wind
+  const w=noise(W,'bandpass',500,.6);const wg=C.createGain();wg.gain.value=.5;w.connect(wg);lfo(.13,.25,wg.gain);layer('wind',wg);
+  // hum: 50 Hz harmonics + soft noise
+  const hm=C.createGain();hm.gain.value=.12;[50,100.4,150.7].forEach((f,i)=>{const o=C.createOscillator();o.frequency.value=f;o.type='sine';const g=C.createGain();g.gain.value=.5/(i+1);o.connect(g);g.connect(hm);o.start()});noise(Br,'lowpass',180).connect(hm);layer('hum',hm);
+  // machinery: rumble + rhythmic
+  const mc=C.createGain();mc.gain.value=.5;const mr=noise(Br,'lowpass',260);mr.connect(mc);lfo(2.3,.2,mc.gain);layer('mach',mc);this.mach=mc;
+  // pipeline: deep drone + gurgle
+  const pp=C.createGain();pp.gain.value=.5;const d1=C.createOscillator();d1.type='sine';d1.frequency.value=38;d1.connect(pp);d1.start();const d2=C.createOscillator();d2.type='sawtooth';d2.frequency.value=55;const d2f=C.createBiquadFilter();d2f.type='lowpass';d2f.frequency.value=90;d2.connect(d2f);const d2g=C.createGain();d2g.gain.value=.25;d2f.connect(d2g);d2g.connect(pp);d2.start();
+  const gu=noise(W,'bandpass',320,2),gug=C.createGain();gug.gain.value=.12;gu.connect(gug);lfo(.7,.08,gug.gain);gug.connect(pp);this.gug=gug;this.d1=d1;this.d2=d2;layer('pipe',pp);
+  // port: harbour noise + engine idle
+  const pt=C.createGain();pt.gain.value=.5;noise(Br,'lowpass',500).connect(pt);const pe=C.createOscillator();pe.type='sawtooth';pe.frequency.value=48;const pef=C.createBiquadFilter();pef.type='lowpass';pef.frequency.value=120;pe.connect(pef);const peg=C.createGain();peg.gain.value=.2;pef.connect(peg);peg.connect(pt);pe.start();layer('port',pt);
+  // waves: two swells
+  const wv=C.createGain();wv.gain.value=0;const wa=noise(W,'lowpass',800),wag=C.createGain();wag.gain.value=.35;wa.connect(wag);lfo(.11,.3,wag.gain);wag.connect(wv);const wb=noise(W,'bandpass',1400,.5),wbg=C.createGain();wbg.gain.value=.12;wb.connect(wbg);lfo(.17,.1,wbg.gain);wbg.connect(wv);layer('waves',wv);this.wv=wv;
+  // sea wind
+  const sw=C.createGain();sw.gain.value=.5;noise(W,'bandpass',700,.4).connect(sw);lfo(.09,.3,sw.gain);layer('swind',sw);
+  // tanker engine
+  const en=C.createGain();en.gain.value=.4;const e1=C.createOscillator();e1.type='sawtooth';e1.frequency.value=42;const ef=C.createBiquadFilter();ef.type='lowpass';ef.frequency.value=140;e1.connect(ef);ef.connect(en);e1.start();const e2=C.createOscillator();e2.type='sine';e2.frequency.value=21;e2.connect(en);e2.start();lfo(7,.12,en.gain);layer('engine',en);this.e1=e1;
+  // music: slow pad
+  const mu=C.createGain();mu.gain.value=.5;const mf=C.createBiquadFilter();mf.type='lowpass';mf.frequency.value=900;mf.connect(mu);const ch=[[57,60,64],[53,57,60],[48,52,55],[55,59,62]];const os=[0,1,2].map(i=>{const o=C.createOscillator();o.type='triangle';const g=C.createGain();g.gain.value=.18;o.connect(g);g.connect(mf);o.start();return o});
+  const mid=m=>440*Math.pow(2,(m-69)/12);let ci=0;const step=()=>{const c=ch[ci++%4];os.forEach((o,i)=>o.frequency.setTargetAtTime(mid(c[i]),C.currentTime,1.5))};step();setInterval(step,8000);layer('mus',mu);
+  // pump motors: low drive tone + slow throb
+  const pm=C.createGain();pm.gain.value=.35;[29,58.2,87.5].forEach((f,i)=>{const o=C.createOscillator();o.type='sine';o.frequency.value=f;const g=C.createGain();g.gain.value=.5/(i+1);o.connect(g);g.connect(pm);o.start()});
+  const pw=C.createOscillator();pw.type='triangle';pw.frequency.value=182;const pwf=C.createBiquadFilter();pwf.type='bandpass';pwf.frequency.value=360;pwf.Q.value=3;const pwg=C.createGain();pwg.gain.value=.05;pw.connect(pwf);pwf.connect(pwg);pwg.connect(pm);pw.start();lfo(.9,.03,pwg.gain);lfo(1.7,.1,pm.gain);layer('pump',pm);
+  // deep sea swell
+  const sl=C.createGain();sl.gain.value=.4;noise(Br,'lowpass',160).connect(sl);lfo(.07,.3,sl.gain);sl.connect(wv);
+  // random industrial clanks + ship horn
+  setInterval(()=>{if(!this.on||C.state!='running')return;const lv=this.MIX[this.cur]||{};if(lv.mach>.3&&Math.random()<.7)this.clank();if(lv.port>.5&&Math.random()<.25)this.horn()},2600);
+  this.ready=true;this.apply(true)},
+ clank(){const C=this.ctx,o=C.createOscillator(),g=C.createGain(),f=C.createBiquadFilter();o.type='triangle';o.frequency.value=140+Math.random()*320;f.type='bandpass';f.frequency.value=700+Math.random()*900;f.Q.value=6;g.gain.setValueAtTime(.12,C.currentTime);g.gain.exponentialRampToValueAtTime(.001,C.currentTime+.35);o.connect(f);f.connect(g);g.connect(this.bus.ind);o.start();o.stop(C.currentTime+.4)},
+ horn(){const C=this.ctx,g=C.createGain(),f=C.createBiquadFilter();f.type='lowpass';f.frequency.value=380;[58.3,87.3,116.5,174.6].forEach(fr=>{const o=C.createOscillator();o.type='sawtooth';o.frequency.value=fr;o.connect(f);o.start();o.stop(C.currentTime+3)});f.connect(g);g.gain.setValueAtTime(0,C.currentTime);g.gain.linearRampToValueAtTime(.16,C.currentTime+.5);g.gain.linearRampToValueAtTime(0,C.currentTime+2.1);g.connect(this.bus.wat)},
+ apply(now){if(!this.ready)return;const C=this.ctx,t=C.currentTime,tc=now?.01:1.8,v=this.vol,m=this.on?v.master:0;
+  this.master.gain.setTargetAtTime(m,t,.3);this.bus.amb.gain.setTargetAtTime(v.amb,t,.3);this.bus.ind.gain.setTargetAtTime(v.ind,t,.3);this.bus.wat.gain.setTargetAtTime(v.wat,t,.3);this.bus.mus.gain.setTargetAtTime(this.musicOn?v.mus:0,t,.3);
+  const mix=this.MIX[this.cur]||this.MIX.global;for(const k in this.L)this.L[k].gain.setTargetAtTime(mix[k]*(k=='mus'?1:1)*(this.over[k]!=null?this.over[k]:1),t,tc)},
+ over:{},
+ start(){if(!this.ctx)try{this.build()}catch(e){this.on=false;return}this.ctx.state!='running'&&this.ctx.resume();this.apply()},
+ scene(n){if(this.cur==n)return;this.cur=n;if(this.ready&&(n=='tanker'||n=='terminal'))setTimeout(()=>this.on&&this.horn(),1400);this.over={};this.apply();$('#audsc')&&($('#audsc').textContent=n)},
+ speed(x){if(!this.ready)return;const t=this.ctx.currentTime;x=Math.max(.2,Math.min(3,x));this.d1.frequency.setTargetAtTime(32+x*6,t,.4);this.d2.frequency.setTargetAtTime(46+x*9,t,.4);this.e1.frequency.setTargetAtTime(36+x*6,t,.4)},
+ flow(x){if(!this.ready)return;this.gug.gain.setTargetAtTime(.06+Math.min(3,x)*.07,this.ctx.currentTime,.3)},
+ water(x){if(!this.ready||this.cur!='tanker')return;this.over.waves=.4+x*.8;this.L.waves.gain.setTargetAtTime(this.MIX.tanker.waves*this.over.waves,this.ctx.currentTime,.3)},
+ dist(x){if(!this.ready)return;this.indF.frequency.setTargetAtTime(5000-x*4300,this.ctx.currentTime,.5)},
+ pause(p){if(!this.ctx)return;p?this.ctx.suspend():(this.on&&this.ctx.resume())},
+ toggle(){this.on=!this.on;if(this.on)this.start();else this.apply();return this.on}};
+['pointerdown','keydown','touchstart'].forEach(e=>addEventListener(e,()=>{if(Aud.on&&!Aud.ready)Aud.start()},{once:false,passive:true}));
+for(const k in Aud.MIX)Aud.MIX[k].pump={global:0,field:.15,process:.45,pipeline:.85,terminal:.25,sea:0,tanker:0,dest:0}[k]||0;Aud.BUS.pump='ind';
+/* ===== CONTENT (EN / RU). Educational summaries — verify figures at tengizchevroil.com and cpc.ru ===== */
+let LANG='en';
+const T2={en:{faq:'Discover TCO',quiz:'Knowledge Quiz',facts:'Did You Know?',src:'Sources',note:'Educational summaries based on public TCO/CPC information and the group presentation. Verify figures on official sites (tengizchevroil.com, cpc.ru).'},
+ ru:{faq:'Узнай о TCO',quiz:'Проверь знания',facts:'А вы знали?',src:'Источники',note:'Учебные краткие ответы на основе открытых данных TCO/CPC и презентации группы. Цифры проверяйте на официальных сайтах (tengizchevroil.com, cpc.ru).'}};
+const FAQ=[
+['About TCO','О TCO',[
+ ['What is Tengizchevroil?','Tengizchevroil (TCO) is a joint venture founded in 1993 to develop the Tengiz field (and Korolev). Shareholders (per group presentation): Chevron 50%, ExxonMobil 25%, KazMunayGas 20%, LUKOIL 5%.','Что такое Тенгизшевройл?','Тенгизшевройл (TCO) — совместное предприятие, созданное в 1993 году для разработки месторождения Тенгиз (и Королёвского). Акционеры (по презентации группы): Chevron 50%, ExxonMobil 25%, КазМунайГаз 20%, ЛУКОЙЛ 5%.'],
+ ['Where is the Tengiz oil field located?','In western Kazakhstan, Atyrau Region, near the north-eastern shore of the Caspian Sea.','Где находится месторождение Тенгиз?','В западном Казахстане, в Атырауской области, недалеко от северо-восточного побережья Каспийского моря.'],
+ ['What does TCO do?','TCO produces crude oil and also processes associated gas and recovers sulfur, then delivers the products for export and domestic use.','Чем занимается TCO?','TCO добывает сырую нефть, перерабатывает попутный газ, получает серу и поставляет продукцию на экспорт и внутренний рынок.'],
+ ['Why is Tengiz important to Kazakhstan?','It is one of the country’s largest producing fields and a major source of export revenue and jobs. In the group presentation TCO output in 2025 was 39 million tonnes.','Почему Тенгиз важен для Казахстана?','Это одно из крупнейших действующих месторождений страны, важный источник экспортных доходов и рабочих мест. По презентации группы добыча TCO в 2025 г. — 39 млн тонн.'],
+ ['What are the main stages of oil production?','Production from wells → separation of oil, gas and water → treatment/stabilisation → storage → transport (pipeline, rail, tanker).','Каковы основные этапы добычи нефти?','Добыча из скважин → разделение нефти, газа и воды → подготовка → хранение → транспортировка (трубопровод, железная дорога, танкер).']]],
+['From the Oil Field to the Market','От месторождения к рынку',[
+ ['How does oil move from Tengiz to export markets?','Mostly through the CPC pipeline to a Black Sea terminal, then by tanker. About 80% of Kazakhstan’s oil exports use CPC (group presentation).','Как нефть попадает с Тенгиза на экспортные рынки?','В основном по трубопроводу КТК к терминалу на Чёрном море, затем танкерами. Около 80% экспорта нефти Казахстана идёт через КТК (презентация группы).'],
+ ['What is the role of CPC?','The Caspian Pipeline Consortium operates a pipeline of roughly 1,500 km from western Kazakhstan to the Russian Black Sea coast, with pumping stations and a marine terminal.','Какова роль КТК?','Каспийский трубопроводный консорциум эксплуатирует трубопровод примерно в 1500 км от западного Казахстана до российского побережья Чёрного моря с насосными станциями и морским терминалом.'],
+ ['Where is the CPC marine terminal located?','Near Novorossiysk (Yuzhnaya Ozereyevka), Krasnodar Krai, on the Black Sea.','Где расположен морской терминал КТК?','Рядом с Новороссийском (Южная Озереевка), Краснодарский край, на Чёрном море.'],
+ ['How does oil travel from the terminal to markets?','Tankers load at offshore buoys, sail the Black Sea, pass the Bosphorus and Dardanelles into the Mediterranean and continue to buyers.','Как нефть идёт от терминала к рынкам?','Танкеры загружаются у морских буёв, идут по Чёрному морю, проходят Босфор и Дарданеллы в Средиземное море и далее к покупателям.'],
+ ['Pipeline vs tanker?','A pipeline moves oil continuously along a fixed route at low unit cost. A tanker is flexible: it can serve different ports, but depends on weather, straits and ship availability.','Чем трубопровод отличается от танкера?','Трубопровод непрерывно перекачивает нефть по фиксированной трассе с низкой удельной стоимостью. Танкер гибок и может идти в разные порты, но зависит от погоды, проливов и наличия судов.']]],
+['Technology and Infrastructure','Технологии и инфраструктура',[
+ ['What is an oil processing facility?','A plant that separates oil, gas and water, removes impurities such as sulfur compounds and prepares oil to pipeline specifications.','Что такое установка подготовки нефти?','Предприятие, которое разделяет нефть, газ и воду, удаляет примеси (в т. ч. соединения серы) и доводит нефть до требований трубопровода.'],
+ ['Why are pumping stations necessary?','Friction and elevation changes reduce pressure; pumping stations restore it so oil keeps flowing over long distances.','Зачем нужны насосные станции?','Трение и перепады высот снижают давление; насосные станции восстанавливают его, чтобы нефть шла на большие расстояния.'],
+ ['What is an oil export terminal?','A facility with storage tanks and loading equipment where oil is transferred from a pipeline to tankers.','Что такое нефтяной экспортный терминал?','Объект с резервуарами и погрузочным оборудованием, где нефть переходит из трубопровода на танкеры.'],
+ ['How are industrial facilities connected?','By pipelines, pumping stations, storage, rail and sea links, all coordinated by control systems and measurement points.','Как связаны промышленные объекты?','Трубопроводами, насосными станциями, хранилищами, железной дорогой и морскими маршрутами под управлением систем контроля и узлов учёта.'],
+ ['How can technology improve oil transportation?','Sensors, leak detection, predictive maintenance and digital models help improve safety, efficiency and planning.','Как технологии улучшают транспортировку нефти?','Датчики, обнаружение утечек, прогнозное обслуживание и цифровые модели повышают безопасность, эффективность и планирование.']]],
+['Environment and the Future','Экология и будущее',[
+ ['Why is environmental monitoring important?','It detects leaks, emissions and impacts early so they can be fixed and limited.','Почему важен экологический мониторинг?','Он позволяет рано выявлять утечки, выбросы и воздействие, чтобы их устранять и ограничивать.'],
+ ['What measures can reduce environmental impact?','Leak prevention, efficient flaring and gas use, safe sulfur handling, spill response plans and energy efficiency.','Какие меры снижают воздействие на окружающую среду?','Предотвращение утечек, эффективное использование газа и факелов, безопасное обращение с серой, планы реагирования на разливы и энергоэффективность.'],
+ ['How can digital technologies improve operations?','Real-time data, analytics and simulation help detect problems earlier and optimise routes and maintenance.','Как цифровые технологии улучшают работу?','Данные в реальном времени, аналитика и моделирование помогают раньше выявлять проблемы и оптимизировать маршруты и обслуживание.'],
+ ['What challenges affect international oil transportation?','Dependence on single routes, straits and weather, regulation, insurance, geopolitics and port capacity.','Какие сложности у международной транспортировки нефти?','Зависимость от единичных маршрутов, проливов и погоды, регулирование, страхование, геополитика и пропускная способность портов.']]]];
+const QUIZ=[
+['Where is the Tengiz field?',['Atyrau Region, Kazakhstan','Aktobe Region, Kazakhstan','Baku, Azerbaijan','Novorossiysk, Russia'],0,'It lies in Atyrau Region near the Caspian shore.','Где находится месторождение Тенгиз?',['Атырауская область, Казахстан','Актюбинская область, Казахстан','Баку, Азербайджан','Новороссийск, Россия'],'Оно расположено в Атырауской области у побережья Каспия.'],
+['What does CPC stand for?',['Caspian Pipeline Consortium','Central Petroleum Company','Caucasus Pump Corridor','Caspian Port Council'],0,'CPC = Caspian Pipeline Consortium.','Что означает КТК (CPC)?',['Каспийский трубопроводный консорциум','Центральная нефтяная компания','Кавказский насосный коридор','Совет каспийских портов'],'CPC — Caspian Pipeline Consortium.'],
+['Where is the CPC marine terminal?',['Near Novorossiysk','Ceyhan','Aktau','Odesa'],0,'Yuzhnaya Ozereyevka near Novorossiysk.','Где находится морской терминал КТК?',['Рядом с Новороссийском','Джейхан','Актау','Одесса'],'Южная Озереевка рядом с Новороссийском.'],
+['How do tankers load oil at the CPC terminal?',['Offshore buoys with floating hoses','Railway wagons','Trucks','Airships'],0,'The terminal uses offshore single-point moorings.','Как танкеры загружаются на терминале КТК?',['У морских буёв через плавучие шланги','Из ж/д цистерн','Из автоцистерн','С дирижаблей'],'Терминал использует морские выносные причальные устройства.'],
+['Which strait do CPC tankers pass to reach the Mediterranean?',['Bosphorus (and Dardanelles)','Gibraltar','Hormuz','Kerch only'],0,'The Turkish straits link the Black Sea and the Mediterranean.','Какие проливы проходят танкеры КТК?',['Босфор (и Дарданеллы)','Гибралтар','Ормузский','Только Керченский'],'Турецкие проливы соединяют Чёрное и Средиземное моря.'],
+['Why are pumping stations needed?',['To keep pressure over long distances','To heat the sea','To store sulfur','To refine petrol'],0,'They restore pressure lost to friction and elevation.','Зачем нужны насосные станции?',['Чтобы поддерживать давление на больших расстояниях','Чтобы нагревать море','Чтобы хранить серу','Чтобы производить бензин'],'Они восстанавливают давление, теряемое на трение и подъёмы.'],
+['Which by-product does TCO recover from sour gas?',['Sulfur','Salt','Gold','Coal'],0,'Sulfur is recovered during gas processing.','Какой побочный продукт получает TCO из сернистого газа?',['Сера','Соль','Золото','Уголь'],'Серу получают при переработке газа.'],
+['BTC passes through which countries?',['Azerbaijan, Georgia, Türkiye','Kazakhstan, Russia, Ukraine','Iran, Iraq, Syria','Armenia, Greece, Italy'],0,'BTC = Baku–Tbilisi–Ceyhan.','Через какие страны проходит BTC?',['Азербайджан, Грузия, Турция','Казахстан, Россия, Украина','Иран, Ирак, Сирия','Армения, Греция, Италия'],'BTC = Баку–Тбилиси–Джейхан.'],
+['Where does BTC end?',['Ceyhan','Novorossiysk','Aktau','Poti'],0,'On Türkiye’s Mediterranean coast.','Где заканчивается BTC?',['Джейхан','Новороссийск','Актау','Поти'],'На средиземноморском побережье Турции.'],
+['Roughly what share of Kazakhstan’s oil exports uses CPC (group presentation)?',['≈80%','≈20%','≈50%','≈5%'],0,'About 80% — which is why route diversification is discussed.','Какая доля экспорта нефти Казахстана идёт через КТК (презентация группы)?',['≈80%','≈20%','≈50%','≈5%'],'Около 80% — поэтому обсуждают диверсификацию маршрутов.']];
+const FACTS=[
+['Tengiz is operated by a joint venture founded in 1993.','Тенгиз разрабатывает совместное предприятие, основанное в 1993 году.','Group presentation / TCO public information','🛢'],
+['In the group presentation TCO output in 2025 is given as 39 million tonnes.','В презентации группы добыча TCO в 2025 году — 39 млн тонн.','Group presentation','📈'],
+['CPC’s marine terminal loads tankers at offshore buoys instead of a quay.','Морской терминал КТК загружает танкеры у морских буёв, а не у причальной стенки.','CPC public materials','⚓'],
+['Every CPC tanker bound for the Mediterranean passes the Bosphorus.','Каждый танкер КТК, идущий в Средиземное море, проходит Босфор.','Geography','🌉'],
+['Sulfur from gas processing is a real product; TCO stores and ships it.','Сера, получаемая при переработке газа, — реальный продукт; TCO хранит и отгружает её.','TCO public information','🟡'],
+['The BTC pipeline links the Caspian (Baku) with the Mediterranean (Ceyhan).','BTC соединяет Каспий (Баку) с Средиземным морем (Джейхан).','BTC public information','🌍'],
+['The group estimated the CPC route at about $38/t and the Trans-Caspian/BTC idea at about $113/t.','Группа оценила маршрут КТК примерно в $38/т, а идею Транскаспий/BTC — около $113/т.','Group presentation (estimate)','💲'],
+['Pumping stations restore pressure so oil can flow for over a thousand kilometres.','Насосные станции восстанавливают давление, чтобы нефть шла более тысячи километров.','Engineering basics','⚙']];
+/* ===== UI ===== */
+const NAV=[['EXPLORE MAP',()=>{closeAll();setView('global')}],['OIL JOURNEY',()=>{closeAll();startJourney()}],['PIPELINE VIEW',()=>{closeAll();setView('pipeline')}],['TANKER VIEW',()=>{closeAll();setView('tanker')}],['DISCOVER TCO',()=>openModal('faq')],['STRATEGIC ANALYSIS',()=>openModal('strat')],['KNOWLEDGE QUIZ',()=>openModal('quiz')],['QR & SHARE',()=>openModal('qr')],['AUDIO',()=>openModal('audio')]];
+function closeAll(){$('#modals').innerHTML='';card.hidden=true}
+$('#nav').innerHTML=NAV.map((n,i)=>'<button data-i="'+i+'">'+n[0]+'</button>').join('');
+$('#nav').onclick=e=>{const b=e.target.closest('button');if(b)NAV[+b.dataset.i][1]()};
+$('#lay').innerHTML='<div style="font-size:9px;opacity:.7;padding:0 2px">MAP LAYER</div>'+Object.entries(LAYERS).map(([k,v])=>'<button data-k="'+k+'">'+v.t+'</button>').join('');
+$('#lay').onclick=e=>{const b=e.target.closest('button');if(b)setLayer(b.dataset.k)};
+$('#views').innerHTML='<div style="font-size:9px;opacity:.7;padding:0 2px">VIEW</div>'+[['global','GLOBAL VIEW'],['pipeline','PIPELINE VIEW'],['industrial','INDUSTRIAL VIEW'],['tanker','TANKER VIEW'],['journey','FULL JOURNEY']].map(v=>'<button data-v="'+v[0]+'">'+v[1]+'</button>').join('');
+$('#views').onclick=e=>{const b=e.target.closest('button');if(b)setView(b.dataset.v)};
+$('#tl').innerHTML=STAGES.map(s=>'<span>'+s+'</span>').join('');
+$('#rm').innerHTML='<button class="rt" data-r="cpc">CPC → Novorossiysk</button><button class="rt" data-r="btc">Aktau–Baku–BTC (idea)</button><button id="ride" class="go">Ride the Oil</button><button id="watch" class="go">▶ Watch the Oil Journey (60 s)</button><button id="bcmp">Compare / What If</button><button id="bchain">Build the chain</button><button id="binfra">Infra status</button><button id="bmis">Missions</button>';
+$$('.rt').forEach(b=>b.onclick=()=>selRoute(b.dataset.r));
+$('#ride').onclick=()=>{if(!mapOK)return;startRide(0)};$('#watch').onclick=()=>startJourney();
+$('#bcmp').onclick=()=>openModal('cmp');$('#bchain').onclick=()=>openModal('chain');$('#binfra').onclick=()=>openModal('infra');$('#bmis').onclick=showMissions;
+/* lock map gestures while the camera is driven */
+function lockMap(b){if(!mapOK)return;['dragPan','scrollZoom','touchZoomRotate','doubleClickZoom','keyboard','dragRotate'].forEach(h=>b?map[h].disable():map[h].enable())}
+const _sr=startRide,_sj=startJourney,_er=exitRide,_ej=endJourney;
+startRide=function(f){lockMap(1);_sr(f)};startJourney=function(){lockMap(1);_sj()};exitRide=function(){lockMap(0);_er()};endJourney=function(){lockMap(0);_ej()};
+$('#jx').onclick=()=>endJourney();$('#ex').onclick=()=>exitRide();$('#jr').onclick=()=>startJourney();
+function openModal(id){Scn.cur&&closeScene();const m=$('#modals');m.innerHTML='<div class="modal"><div class="pn" id="mb"><button class="x" id="mx">✕</button></div></div>';$('#mx').onclick=closeAll;m.firstChild.onclick=e=>{if(e.target==m.firstChild)closeAll()};
+ const f={faq:mFaq,quiz:mQuiz,strat:mStrat,qr:mQR,audio:mAudio,cmp:mCmp,chain:mChain,infra:mInfra}[id];f($('#mb'))}
+function langBar(el,cb){el.insertAdjacentHTML('beforeend','<div class="row" style="margin:0 0 8px;max-width:210px"><button data-l="en">English</button><button data-l="ru">Русский</button></div>');
+ const up=()=>$$('#mb [data-l]').forEach(b=>b.classList.toggle('on',b.dataset.l==LANG));up();$$('#mb [data-l]').forEach(b=>b.onclick=()=>{LANG=b.dataset.l;cb()})}
+/* FAQ */
+function mFaq(el){const r=()=>{const i=LANG=='en'?0:1,t=T2[LANG];el.innerHTML='<button class="x" id="mx">✕</button><h3>'+t.faq+'</h3>';$('#mx').onclick=closeAll;langBar(el,r);
+ el.insertAdjacentHTML('beforeend',FAQ.map(c=>'<h4>'+c[i].toUpperCase()+'</h4>'+c[2].map(q=>'<details><summary>'+q[i*2]+'</summary><p>'+q[i*2+1]+'</p></details>').join('')).join('')+'<p class="foot">'+t.note+'</p>')};r()}
+/* Quiz */
+function mQuiz(el){let qi=0,sc=0,qs=[];const start=()=>{qi=0;sc=0;qs=QUIZ.map(q=>q.slice()).sort(()=>Math.random()-.5);show()};
+ const show=()=>{const i=LANG=='en'?0:4,t=T2[LANG];el.innerHTML='<button class="x" id="mx">✕</button><h3>'+t.quiz+'</h3>';$('#mx').onclick=closeAll;langBar(el,show);
+  if(qi>=qs.length){addScore(sc*10);el.insertAdjacentHTML('beforeend','<h3>'+(LANG=='en'?'Result: ':'Результат: ')+sc+' / '+qs.length+'</h3><div class="meter"><div style="width:'+sc/qs.length*100+'%"></div></div><p>'+(sc/qs.length>=.8?'🏆':'👍')+' +'+sc*10+' ★</p><button class="go" id="try">'+(LANG=='en'?'Try Again':'Ещё раз')+'</button>');$('#try').onclick=start;return}
+  const q=qs[qi],ans=q[LANG=='en'?1:5].map((o,k)=>[o,k==q[2]]).sort(()=>Math.random()-.5);
+  el.insertAdjacentHTML('beforeend','<p style="color:var(--cy);font-size:11px">'+(LANG=='en'?'Question ':'Вопрос ')+(qi+1)+(LANG=='en'?' of ':' из ')+qs.length+'</p><div class="meter"><div style="width:'+qi/qs.length*100+'%"></div></div><p style="font-size:14px;font-weight:600">'+q[i]+'</p>'+ans.map((a,k)=>'<button class="q" data-k="'+k+'">'+a[0]+'</button>').join('')+'<div id="ex" style="font-size:12px;margin-top:8px"></div>');
+  $$('#mb .q').forEach(b=>b.onclick=()=>{if($('#ex').dataset.d)return;$('#ex').dataset.d=1;const c=ans[+b.dataset.k][1];if(c)sc++;b.classList.add(c?'ok':'no');$$('#mb .q').forEach((x,k)=>{if(ans[k][1])x.classList.add('ok')});$('#ex').innerHTML=(c?'✔ ':'✖ ')+q[LANG=='en'?3:6]+'<br><button class="go" id="nx" style="margin-top:8px">'+(qi==qs.length-1?(LANG=='en'?'Finish':'Завершить'):(LANG=='en'?'Next':'Далее'))+'</button>';$('#nx').onclick=()=>{qi++;show()}})};start()}
+/* Facts */
+function mFacts(el){let k=Math.floor(Math.random()*FACTS.length);const r=()=>{const t=T2[LANG],f=FACTS[k],i=LANG=='en'?0:1;el.innerHTML='<button class="x" id="mx">✕</button><h3>'+t.facts+'</h3>';$('#mx').onclick=closeAll;langBar(el,r);
+ el.insertAdjacentHTML('beforeend','<div style="text-align:center;font-size:54px;margin:10px">'+f[3]+'</div><p style="font-size:15px;line-height:1.6;text-align:center">'+f[i]+'</p><p class="foot" style="text-align:center">'+t.src+': '+f[2]+'</p><div class="row"><button class="go" id="nf">'+(LANG=='en'?'Discover Another Fact':'Ещё факт')+'</button></div><p class="foot">'+t.note+'</p>');$('#nf').onclick=()=>{k=(k+1+Math.floor(Math.random()*(FACTS.length-1)))%FACTS.length;r()}};r()}
+/* QR */
+function mQR(el){const url=location.href.split('#')[0],okU=/^https?:/.test(url);
+ el.insertAdjacentHTML('beforeend','<h3>Explore TCO Route Lab</h3><p style="font-size:12px">Scan to Explore</p><div id="qrb" style="background:#fff;padding:12px;display:inline-block;border-radius:10px"></div><div style="margin:8px 0"><input id="qu" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--ln);background:#1e293b;color:#fff" value="'+(okU?url:'')+'" placeholder="https://your-published-site"></div><div class="row"><button id="qg" class="go">Generate QR</button><button id="qc">Copy Link</button><button id="qd">Download QR Code</button></div><p class="foot" id="qn">'+(okU?'QR uses this page’s real address.':'This preview has no public URL yet. Publish the site first, then open it from its real address (or paste the real URL above). No fake links are generated.')+'</p>');
+ const gen=()=>{const u=$('#qu').value.trim();$('#qrb').innerHTML='';if(!/^https?:\/\//.test(u)){$('#qrb').innerHTML='<div style="width:180px;height:180px;color:#0F172A;font-size:12px;padding:20px">Enter the real published URL</div>';return}try{new QRCode($('#qrb'),{text:u,width:180,height:180,colorDark:'#0F172A',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M})}catch(e){$('#qn').textContent='QR library not loaded.'}};
+ $('#qg').onclick=gen;gen();
+ $('#qg').insertAdjacentHTML('beforebegin','<button id="qs1" class="on">Site QR</button><button id="qs2">Quiz QR</button>');
+ const base=url.replace(/#.*/,'');const mode=h=>{$('#qu').value=base+h;$('#qs1').classList.toggle('on',!h);$('#qs2').classList.toggle('on',!!h);gen()};
+ $('#qs1').onclick=()=>mode('');$('#qs2').onclick=()=>mode('#quiz');
+ $('#qc').onclick=()=>{const u=$('#qu').value.trim();if(!u)return;(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>say('Link copied'),()=>{$('#qu').select();document.execCommand&&document.execCommand('copy');say('Link copied')})};
+ $('#qd').onclick=()=>{const c=$('#qrb canvas'),im=$('#qrb img');const src=c?c.toDataURL('image/png'):im&&im.src;if(!src)return say('Generate a QR first');const a=document.createElement('a');a.href=src;a.download='tco-route-lab-qr.png';a.click()}}
+/* Audio */
+function mAudio(el){const row=(l,k)=>'<label>'+l+' <b id="v_'+k+'">'+Math.round(Aud.vol[k]*100)+'</b><input type="range" min="0" max="100" value="'+Aud.vol[k]*100+'" data-k="'+k+'"></label>';
+ el.insertAdjacentHTML('beforeend','<h3>Audio Settings</h3><p style="font-size:11.5px">Sounds are synthesized in your browser (no files, no licensing). Scene now: <b id="audsc">'+Aud.cur+'</b></p><div class="row"><button id="asn" class="'+(Aud.on?'on':'')+'">'+(Aud.on?'🔊 Sound On':'🔇 Sound Off')+'</button><button id="amu" class="'+(Aud.musicOn?'on':'')+'">Music '+(Aud.musicOn?'On':'Off')+'</button><button id="alow" class="'+(Q.low?'on':'')+'">Reduce effects '+(Q.low?'On':'Off')+'</button></div>'+row('Master Volume','master')+row('Ambient Sound','amb')+row('Industrial Sound','ind')+row('Water & Ocean Sound','wat')+row('Music','mus')+'<p class="foot">Sound starts only after your first tap, as browsers require. “Reduce effects” lowers render resolution and water detail for phones.</p>');
+ $$('#mb input[type=range]').forEach(r=>r.oninput=()=>{Aud.vol[r.dataset.k]=r.value/100;$('#v_'+r.dataset.k).textContent=r.value;Aud.start();Aud.apply()});
+ $('#asn').onclick=e=>{const o=Aud.toggle();e.target.textContent=o?'🔊 Sound On':'🔇 Sound Off';e.target.classList.toggle('on',o)};
+ $('#amu').onclick=e=>{Aud.musicOn=!Aud.musicOn;Aud.start();Aud.apply();e.target.textContent='Music '+(Aud.musicOn?'On':'Off');e.target.classList.toggle('on',Aud.musicOn)};
+ $('#alow').onclick=e=>{Q.low=!Q.low;e.target.textContent='Reduce effects '+(Q.low?'On':'Off');e.target.classList.toggle('on',Q.low);for(const k in Scn.S)delete Scn.S[k];Scn.r&&Scn.size()}}
+/* Compare + What If (assumptions are SIMULATION unless marked) */
+function mCmp(el){el.insertAdjacentHTML('beforeend','<h3>Route Comparison</h3><p><span class="b bg">GAME ASSUMPTIONS</span> Costs: group presentation estimates. Transfers/risks/time: simplified simulation values.</p><table><tr><th></th><th>CPC</th><th>Trans-Caspian + BTC (idea)</th></tr><tr><td>Steps</td><td>Field → pipeline → terminal → tanker → straits</td><td>Field → rail/other → Aktau → Caspian ship → Baku → BTC → Ceyhan → tanker</td></tr><tr><td>Cost</td><td>≈ $38/t</td><td>≈ $113/t (+$75/t)</td></tr><tr><td>Transfers (sim)</td><td>2</td><td>5</td></tr><tr><td>Time (sim)</td><td>≈ 14 days</td><td>≈ 24 days</td></tr><tr><td>Risks</td><td>Single-route concentration, straits</td><td>Caspian capacity, many hand-offs, cost</td></tr><tr><td>Benefit</td><td>Cheap, direct, proven</td><td>Diversification</td></tr></table><p class="foot">The alternative route is NOT presented as an active TCO commercial flow.</p><h4>WHAT IF? <span class="b bg">SIMULATION</span></h4><label>Annual volume (Mt): <b id="w1">5</b><input id="r1" type="range" min="1" max="20" value="5"></label><label>Share via alternative route: <b id="w2">30</b>%<input id="r2" type="range" min="0" max="100" value="30"></label><label>Extra tariff of alternative ($/t): <b id="w3">75</b><input id="r3" type="range" min="20" max="150" value="75"></label><label>CPC outage length (days): <b id="w4">30</b><input id="r4" type="range" min="0" max="90" value="30"></label><div id="wo" style="margin-top:10px;font-size:12.5px;line-height:1.7"></div>');
+ const up=()=>{const v=+$('#r1').value,s=+$('#r2').value/100,t=+$('#r3').value,d=+$('#r4').value;['1','2','3','4'].forEach(k=>$('#w'+k).textContent=$('#r'+k).value);
+  const extra=v*s*t,avgT=(1-s)*14+s*24,lost=v*(1-s)*d/365,res=Math.round(100*(1-(1-s)*Math.min(1,d/90)*.8));
+  $('#wo').innerHTML='Extra annual cost: <em style="color:var(--gold)">$'+extra.toFixed(0)+'M</em> · avg. delivery time: <em style="color:var(--gold)">'+avgT.toFixed(1)+' days</em><br>Volume exposed to a CPC outage: <em style="color:var(--gold)">'+lost.toFixed(2)+' Mt</em> · resilience score: <em style="color:var(--gold)">'+res+'/100</em><div class="meter"><div style="width:'+res+'%"></div></div><span class="foot">Formula: extra = volume × share × tariff. Group example: 5 Mt × $75/t = $375M/year at 100%.</span>'};
+ $$('#mb input[type=range]').forEach(r=>r.oninput=up);up();if(!done[6]){done[6]=1;addScore(30)}}
+/* Build the supply chain */
+function mChain(el){const ORD=['Oil field','Oil treatment','Export pipeline','Marine terminal','Tanker loading','Sea transport','Destination'];let need=0,shuf=ORD.slice().sort(()=>Math.random()-.5),err=0;
+ const r=()=>{el.innerHTML='<button class="x" id="mx">✕</button><h3>Build the Supply Chain</h3><p style="font-size:12px">Tap the stages in the correct order, from source to destination.</p><div id="bd" style="font-size:12px;margin:6px 0">'+ORD.slice(0,need).map((s,i)=>'<span class="b bf">'+(i+1)+'. '+s+'</span>').join(' → ')+'</div><div class="row">'+shuf.filter(s=>ORD.indexOf(s)>=need).map(s=>'<button class="q" style="width:auto;flex:1;min-width:130px" data-s="'+s+'">'+s+'</button>').join('')+'</div>'+(need==ORD.length?'<h3>✔ Chain complete! '+(err?err+' mistake(s)':'Perfect')+'</h3><button class="go" id="ag">Again</button>':'');$('#mx').onclick=closeAll;
+  $$('#mb .q').forEach(b=>b.onclick=()=>{if(b.dataset.s==ORD[need]){need++;if(need==ORD.length){addScore(Math.max(20,70-err*10));say('Chain built ★')}r()}else{err++;b.classList.add('no');say('Not yet — what comes first?')}});const a=$('#ag');a&&(a.onclick=()=>{need=0;err=0;shuf.sort(()=>Math.random()-.5);r()})};r()}
+/* Infrastructure status (SIMULATION) */
+function mInfra(el){el.insertAdjacentHTML('beforeend','<h3>Infrastructure Status <span class="b bg">SIMULATION DATA</span></h3><p style="font-size:11.5px">Values are invented for the game and do not describe real equipment.</p><div id="ib"></div>');
+ const up=()=>{if(!$('#ib'))return clearInterval(iv);$('#ib').innerHTML=INFRA.map((x,i)=>{const av=96+Math.round(Math.sin(Date.now()/4000+i)*3),ld=60+Math.round(Math.sin(Date.now()/3000+i*2)*20);return'<div style="margin:8px 0"><b>'+x[0]+'</b> <span class="foot">'+x[1]+'</span><br><span style="font-size:11px">Availability '+av+'% · Load '+ld+'% · <span style="color:#4cf08a">● NORMAL</span></span><div class="meter"><div style="width:'+ld+'%"></div></div></div>'}).join('')};const iv=setInterval(up,1000);up()}
+
+const Qx=(q,a,e,rq,ra,re)=>QUIZ.push([q,a,0,e,rq,ra,re]);
+Qx('In the BCG matrix, which product is the Cash Cow for TCO?',['Crude oil','Sulfur','Gas products','Water'],'Crude oil: mature, large share, steady cash.','Какой продукт TCO — Cash Cow в матрице BCG?',['Сырая нефть','Сера','Газовая продукция','Вода'],'Сырая нефть: зрелый рынок, большая доля, стабильный денежный поток.');
+Qx('Which TCO product is the Star in the BCG matrix?',['Sulfur','Crude oil','Gas products','Rail wagons'],'Sulfur: high growth and strong position (group analysis).','Какой продукт TCO — Star в матрице BCG?',['Сера','Сырая нефть','Газовая продукция','Ж/д вагоны'],'Сера: высокий рост и сильная позиция (анализ группы).');
+Qx('Gas products are a Question Mark because they have…',['High growth but low market share','Low growth and high share','No growth and no share','Only domestic buyers'],'Question Mark = high growth, low share: invest or divest.','Газовая продукция — Question Mark, потому что у неё…',['Высокий рост, но малая доля','Низкий рост и большая доля','Нет роста и доли','Только внутренние покупатели'],'Question Mark = высокий рост, малая доля: инвестировать или выходить.');
+Qx('What are the axes of the BCG matrix?',['Market growth and relative market share','Price and cost','Profit and debt','Risk and time'],'Growth (vertical) vs relative share (horizontal).','Какие оси у матрицы BCG?',['Рост рынка и относительная доля','Цена и себестоимость','Прибыль и долг','Риск и время'],'Рост рынка (вертикаль) и относительная доля (горизонталь).');
+Qx('Dependence on CPC is mainly a… in SWOT.',['Weakness / Threat','Strength only','Opportunity only','Not relevant'],'About 80% of exports rely on one route.','Зависимость от КТК в SWOT — это в основном…',['Слабость / Угроза','Только сила','Только возможность','Не имеет значения'],'Около 80% экспорта идёт по одному маршруту.');
+Qx('Which route is the alternative to CPC discussed in the project?',['Aktau–Baku–BTC','Atyrau–Ufa rail only','Poti–Odesa','Suez Canal only'],'Trans-Caspian to Baku, then BTC to Ceyhan.','Какой альтернативный КТК маршрут рассматривается?',['Актау–Баку–BTC','Только ж/д Атырау–Уфа','Поти–Одесса','Только Суэцкий канал'],'Транскаспий до Баку, затем BTC до Джейхана.');
+Qx('Estimated cost: CPC vs Trans-Caspian/BTC (group estimate)?',['≈$38/t vs ≈$113/t','≈$113/t vs ≈$38/t','≈$10/t vs ≈$12/t','Both ≈$75/t'],'The alternative adds about $75/t.','Оценка стоимости: КТК и Транскаспий/BTC (оценка группы)?',['≈$38/т и ≈$113/т','≈$113/т и ≈$38/т','≈$10/т и ≈$12/т','Оба ≈$75/т'],'Альтернатива дороже примерно на $75/т.');
+Qx('Porter: why is the threat of new entrants low in oil production?',['Huge capital, technology and infrastructure needs','Anyone can drill freely','Prices are fixed by TCO','There are no regulations'],'High entry barriers.','Porter: почему угроза новых игроков в добыче нефти низкая?',['Огромные капиталы, технологии и инфраструктура','Бурить может любой','Цены задаёт TCO','Нет регулирования'],'Высокие барьеры входа.');
+Qx('Porter: crude oil buyers have power mainly because…',['Oil is a commodity and buyers can switch suppliers','Only one buyer exists','TCO sells at fixed price','Buyers own the pipeline'],'Commodity product, benchmark prices.','Porter: сила покупателей нефти в основном потому, что…',['Нефть — сырьё, поставщика можно сменить','Покупатель один','TCO продаёт по фиксированной цене','Покупатели владеют трубой'],'Товарный продукт, цены привязаны к бенчмаркам.');
+Qx('Which force is HIGH for TCO: competitive rivalry or threat of new entrants?',['Competitive rivalry','Threat of new entrants','Both are zero','Neither can be analysed'],'Global producers compete for the same buyers.','Какая сила высокая для TCO?',['Конкурентная борьба','Угроза новых игроков','Обе равны нулю','Анализ невозможен'],'Мировые производители борются за одних покупателей.');
+Qx('A SWOT analysis separates factors into…',['Internal (S, W) and external (O, T)','Past and future only','Costs and revenues','Buyers and sellers'],'S/W are internal, O/T are external.','SWOT делит факторы на…',['Внутренние (S, W) и внешние (O, T)','Только прошлое и будущее','Затраты и доходы','Покупателей и продавцов'],'S/W — внутренние, O/T — внешние.');
+Qx('Why is the Bosphorus a strategic risk for CPC tankers?',['It is the only passage to the Mediterranean','It freezes every winter','It has no traffic','It is a pipeline'],'Traffic and regulation can delay tankers.','Почему Босфор — риск для танкеров КТК?',['Это единственный проход в Средиземное море','Он замерзает каждую зиму','Там нет судов','Это трубопровод'],'Трафик и регулирование могут задерживать танкеры.');
+Qx('Which partner holds the largest TCO share (group presentation)?',['Chevron (50%)','ExxonMobil (25%)','KazMunayGas (20%)','LUKOIL (5%)'],'Chevron 50%, ExxonMobil 25%, KMG 20%, LUKOIL 5%.','Кто имеет наибольшую долю в TCO (презентация группы)?',['Chevron (50%)','ExxonMobil (25%)','КазМунайГаз (20%)','ЛУКОЙЛ (5%)'],'Chevron 50%, ExxonMobil 25%, КМГ 20%, ЛУКОЙЛ 5%.');
+Qx('What management skill does route diversification illustrate?',['Strategic planning and risk management','Only accounting','Only marketing','Staff rotation'],'Reducing single-point dependence is strategic risk management.','Какой управленческой функции соответствует диверсификация маршрутов?',['Стратегическое планирование и управление рисками','Только бухучёт','Только маркетинг','Ротация персонала'],'Снижение зависимости от одной точки — стратегическое управление рисками.');
+Qx('TCO output in 2025 per the group presentation was…',['39 million tonnes','3.9 million tonnes','390 million tonnes','0.39 million tonnes'],'39 Mt.','Добыча TCO в 2025 г. по презентации группы…',['39 млн тонн','3,9 млн тонн','390 млн тонн','0,39 млн тонн'],'39 млн т.');
+
+const STR={
+swot:[['S','Strengths','Сильные стороны','#38bdf8',[
+ ['Large oil reserves at Tengiz','Tengiz & Korolev fields in Western Kazakhstan give TCO a deep resource base.','Крупные запасы Тенгиза','Месторождения Тенгиз и Королёв в Западном Казахстане — мощная ресурсная база.'],
+ ['High production: 39M tonnes (2025)','2025 key result: 39M tonnes of oil, $10.6B direct payments to Kazakhstan, $212B cumulative since 1993.','Добыча 39 млн т (2025)','Итоги 2025: 39 млн т нефти, $10,6 млрд прямых платежей Казахстану, $212 млрд накопленно с 1993 г.'],
+ ['Advanced technology & environment','Technology and environmental improvements support efficient, responsible operations.','Технологии и экология','Технологии и экологические улучшения обеспечивают эффективную и ответственную работу.']]],
+ ['W','Weaknesses','Слабые стороны','#94a3b8',[
+ ['Heavy dependence on CPC ★','≈80% of Kazakhstan’s oil exports move through the CPC route; alternative export capacity is limited.','Зависимость от КТК ★','≈80% экспорта нефти Казахстана идёт по маршруту КТК; альтернативные мощности ограничены.','cpc'],
+ ['Concentrated infrastructure','Production is concentrated in one complex, so a single failure has large impact.','Концентрация инфраструктуры','Добыча сосредоточена в одном комплексе — один сбой имеет большие последствия.'],
+ ['Operational vulnerability','Exposed to operational disruptions along the chain.','Операционная уязвимость','Подвержена операционным сбоям по всей цепочке.']]],
+ ['O','Opportunities','Возможности','#2dd4bf',[
+ ['Alternative route Aktau–Baku–BTC ★','Trans-Caspian corridor connecting to the Baku–Tbilisi–Ceyhan pipeline gives additional market access.','Маршрут Актау–Баку–BTC ★','Транскаспийский коридор и трубопровод Баку–Тбилиси–Джейхан дают дополнительный доступ к рынкам.','btc'],
+ ['Long-term strategic negotiations','Agreements can secure supplementary export capacity.','Долгосрочные переговоры','Соглашения могут обеспечить дополнительные экспортные мощности.'],
+ ['Greater export flexibility','More than one route reduces concentration risk.','Гибкость экспорта','Несколько маршрутов снижают риск концентрации.']]],
+ ['T','Threats','Угрозы','#f87171',[
+ ['CPC pipeline disruptions ★','A CPC stoppage hits most exports; full Tengiz shutdown costs participants ≈$40M/day (Interfax, Jan 2026).','Сбои КТК ★','Остановка КТК бьёт по большей части экспорта; полная остановка Тенгиза стоит участникам ≈$40 млн/сутки (Interfax, янв. 2026).','cpc'],
+ ['Geopolitical instability','Politics around the Russian route can restrict exports.','Геополитическая нестабильность','Политика вокруг российского маршрута может ограничить экспорт.'],
+ ['Oil price volatility','Global price swings affect revenue and rivalry.','Волатильность цен','Колебания мировых цен влияют на выручку и конкуренцию.']]]],
+porter:[['rival','Competitive rivalry','Конкурентная борьба','HIGH','ВЫСОКАЯ','Global competition and oil price pressure.','Глобальная конкуренция и давление цен на нефть.'],
+ ['buy','Bargaining power of buyers','Сила покупателей','MEDIUM','СРЕДНЯЯ','Buyers have alternative crude suppliers.','У покупателей есть альтернативные поставщики сырой нефти.'],
+ ['sup','Bargaining power of suppliers','Сила поставщиков','HIGH','ВЫСОКАЯ','Limited export routes increase dependency.','Ограниченные экспортные маршруты усиливают зависимость.'],
+ ['sub','Threat of substitutes','Угроза заменителей','MEDIUM','СРЕДНЯЯ','Growing adoption of alternative energy.','Растущее внедрение альтернативной энергетики.'],
+ ['new','Threat of new entrants','Угроза новых игроков','LOW','НИЗКАЯ','High capital and technical barriers.','Высокие капитальные и технические барьеры.']],
+bcg:[['oil','Crude Oil','Сырая нефть','Cash Cow','Cash Cow',.22,.78,34,'Core product and established production.','Основной продукт и устоявшаяся добыча.'],
+ ['sul','Sulfur','Сера','Star','Star',.3,.25,24,'Potential growth in industrial demand.','Потенциальный рост промышленного спроса.'],
+ ['gas','Gas Products','Газовая продукция','Question Mark','Question Mark',.74,.27,20,'Growth potential; market position uncertain.','Потенциал роста; позиция на рынке неопределённа.']]};
+let STD={};
+function mStrat(el){let tab='swot',sel=null;const r=()=>{const L=LANG=='en'?0:1;el.innerHTML='<button class="x" id="mx">✕</button><h3>'+(L?'Strategic Analysis · TCO':'Strategic Analysis · TCO')+'</h3>';$('#mx').onclick=closeAll;langBar(el,r);
+ el.insertAdjacentHTML('beforeend','<div class="foot" style="margin-bottom:6px;opacity:.9">39M t · $10.6B '+(L?'платежей РК (2025)':'direct payments (2025)')+' · $212B '+(L?'с 1993':'since 1993')+' · ≈80% CPC</div><div class="row" style="margin-bottom:8px">'+[['swot','SWOT'],['porter',L?'5 сил Портера':'Porter’s 5 Forces'],['bcg','BCG'],['rec',L?'Рекомендация':'Recommendation']].map(t=>'<button class="tb'+(tab==t[0]?' on':'')+'" data-t="'+t[0]+'">'+t[1]+'</button>').join('')+'</div><div id="sb"></div><p class="foot">'+(L?'Учебный анализ группы (Principles of Management). Оценки — суждения, не официальные данные TCO.':'Group analysis (Principles of Management). Sources: TCO 2025 results, Porter (2008), Henderson (1970), Interfax (2026).')+'</p>');
+ $$('#mb .tb').forEach(b=>b.onclick=()=>{tab=b.dataset.t;sel=null;r()});const B=$('#sb');
+ if(!STD[tab]){STD[tab]=1;addScore(20)}
+ if(tab=='swot'){B.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'+STR.swot.map(q=>'<div style="border:1px solid '+q[3]+';border-radius:10px;padding:7px;background:rgba(71,85,105,.18)"><b style="color:'+q[3]+';font-size:12px">'+q[0]+' · '+q[1+L]+'</b>'+q[4].map((it,i)=>'<button class="q" style="font-size:11px;padding:6px;margin:4px 0" data-i="'+q[0]+i+'">'+it[L*2]+'</button>').join('')+'</div>').join('')+'</div><div id="dt" class="pn" style="margin-top:8px;padding:10px;font-size:12.5px;line-height:1.5">'+(L?'Нажмите на пункт ★ = связан с КТК/BTC.':'Tap any item. ★ = linked to CPC/BTC.')+'</div>';
+  $$('#sb .q').forEach(b=>b.onclick=()=>{const q=STR.swot.find(x=>x[0]==b.dataset.i[0]),it=q[4][+b.dataset.i.slice(1)];$$('#sb .q').forEach(x=>x.classList.remove('ok'));b.classList.add('ok');
+   $('#dt').innerHTML='<b style="color:'+q[3]+'">'+it[L*2]+'</b><br>'+it[L*2+1]+(it[4]?'<br><button class="go" id="gm" style="margin-top:8px">'+(L?'Показать маршрут на карте':'Show this route on the map')+'</button>':'');
+   const g=$('#gm');g&&(g.onclick=()=>{closeAll();selRoute(it[4])})})}
+ else if(tab=='porter'){const P=Object.fromEntries(STR.porter.map(x=>[x[0],x])),c=k=>{const x=P[k];return'<button class="q" data-k="'+k+'" style="margin:0;height:100%;font-size:11px;text-align:center'+(sel==k?';background:var(--gold);color:#04101f':'')+'">'+x[1+L]+'<br><b>'+x[3+L]+'</b></button>'};
+  B.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:auto auto auto;gap:6px"><div></div>'+c('new')+'<div></div>'+c('sup')+c('rival')+c('buy')+'<div></div>'+c('sub')+'<div></div></div><div id="dt" class="pn" style="margin-top:8px;padding:10px;font-size:12.5px;line-height:1.5">'+(sel?'<b>'+P[sel][1+L]+' — '+P[sel][3+L]+'</b><br>'+P[sel][5+L]:(L?'Нажмите на силу.':'Tap a force.'))+'</div>';
+  $$('#sb .q').forEach(b=>b.onclick=()=>{sel=b.dataset.k;r()})}
+ else if(tab=='bcg'){B.innerHTML='<svg viewBox="0 0 300 220" style="width:100%;max-width:420px;display:block;margin:auto"><rect x="10" y="10" width="140" height="100" fill="rgba(14,165,233,.14)" stroke="#475569"/><rect x="150" y="10" width="140" height="100" fill="rgba(71,85,105,.25)" stroke="#475569"/><rect x="10" y="110" width="140" height="100" fill="rgba(45,212,191,.12)" stroke="#475569"/><rect x="150" y="110" width="140" height="100" fill="rgba(71,85,105,.12)" stroke="#475569"/><g fill="#94a3b8" font-size="9" font-family="Montserrat"><text x="16" y="24">STAR</text><text x="156" y="24">QUESTION MARK</text><text x="16" y="204">CASH COW</text><text x="156" y="204">DOG</text></g>'+STR.bcg.map(b=>'<circle data-k="'+b[0]+'" cx="'+(10+b[5]*280)+'" cy="'+(10+(b[0]=='oil'?.78:b[6])*200)+'" r="'+b[7]+'" fill="#0ea5e9" fill-opacity="'+(sel==b[0]?.95:.6)+'" stroke="#e2e8f0" stroke-width="'+(sel==b[0]?3:1)+'" style="cursor:pointer"/><text x="'+(10+b[5]*280)+'" y="'+(10+(b[0]=='oil'?.78:b[6])*200+3)+'" fill="#fff" font-size="8" font-weight="700" text-anchor="middle" pointer-events="none" font-family="Montserrat">'+b[1+L]+'</text>').join('')+'</svg><p class="foot" style="text-align:center">'+(L?'↑ Рост рынка · → Относительная доля (слева — высокая)':'↑ Market growth · → Relative share (left = high)')+'</p><div id="dt" class="pn" style="margin-top:8px;padding:10px;font-size:12.5px;line-height:1.5">'+(sel?(b=>'<b>'+b[1+L]+' — '+b[3]+'</b><br>'+b[8+L])(STR.bcg.find(x=>x[0]==sel)):(L?'Нажмите на круг. DOG: не выявлен — недостаточно рыночных данных.':'Tap a bubble. DOG: not identified — insufficient market data.'))+'</div>';
+  $$('#sb circle').forEach(c=>c.onclick=()=>{sel=c.dataset.k;r()})} else{B.innerHTML='<div style="font-size:12.5px;line-height:1.5"><b style="color:var(--gold)">'+(L?'Диверсификация экспортных маршрутов':'Export route diversification')+'</b><br>'+(L?'Цели: снизить транспортные риски, повысить гибкость экспорта, укрепить операционную устойчивость. Подход: обеспечить дополнительные экспортные мощности через Транскаспийский коридор.':'Objectives: reduce transportation risks, improve export flexibility, strengthen operational resilience. Approach: secure supplementary export capacity through the Trans-Caspian corridor.')+'</div><table style="margin-top:8px"><tr><th></th><th>CPC</th><th>Aktau–Baku–BTC</th></tr><tr><td>'+(L?'Стоимость':'Cost')+'</td><td>$38/t</td><td>$113/t</td></tr><tr><td>'+(L?'Допзатраты':'Extra')+'</td><td>—</td><td>+$75/t</td></tr></table><label>'+(L?'Объём через BTC, млн т/год':'Volume via BTC, Mt/yr')+': <b id="v1">5</b><input id="s1" type="range" min="1" max="20" value="5"></label><label>'+(L?'Длительность остановки Тенгиза, дни':'Tengiz shutdown length, days')+': <b id="v2">7</b><input id="s2" type="range" min="1" max="30" value="7"></label><div id="ro" class="pn" style="margin-top:8px;padding:10px;font-size:12.5px;line-height:1.6"></div><div class="row" style="margin-top:8px"><button id="m1">CPC → map</button><button id="m2">BTC → map</button></div><p class="foot">'+(L?'Допзатраты = объём × $75/т (пример группы: 5 млн т × $75 = $375 млн/год). Убыток $40 млн/сутки — оценка Минэнерго РК при полной остановке Тенгиза (Interfax, 2026); упрощённая модель.':'Extra cost = volume × $75/t (group example: 5 Mt × $75 = $375M/yr). $40M/day is the Energy Ministry’s estimate for a full Tengiz shutdown (Interfax, 2026); simplified model.')+'</p>';
+  const u=()=>{const v=+$('#s1').value,d=+$('#s2').value,ex=v*75,ls=d*40,be=ex/40;$('#v1').textContent=v;$('#v2').textContent=d;$('#ro').innerHTML=(L?'Допзатраты BTC':'Extra BTC cost')+': <em>$'+ex+'M/'+(L?'год':'yr')+'</em><br>'+(L?'Потери при остановке':'Shutdown loss')+': <em>$'+ls+'M</em><br>'+(L?'Окупаемость страховки: остановка длиннее':'Break-even: a shutdown longer than')+' <em>'+be.toFixed(1)+' '+(L?'дн.':'days')+'</em><br><span class="foot">'+(L?'Компромисс: выше затраты на транспорт против меньшего риска концентрации.':'Trade-off: higher transport cost versus lower concentration risk.')+'</span>'};
+  $$('#sb input').forEach(x=>x.oninput=u);u();$('#m1').onclick=()=>{closeAll();selRoute('cpc')};$('#m2').onclick=()=>{closeAll();selRoute('btc')}}};r()}
+if(location.hash=='#quiz')setTimeout(()=>openModal('quiz'),1800);
+addEventListener('hashchange',()=>{if(location.hash=='#quiz')openModal('quiz')});
+/* ===== init ===== */
+$('#sc').onclick=showMissions;
+selRoute=(f=>function(id){R=ROUTES[id];$$('.rt').forEach(b=>b.classList.toggle('on',b.dataset.r==id));if(mapOK){try{map.setPaintProperty('routes-pipe','line-opacity',['case',['==',['get','r'],R.id],1,.45]);map.setPaintProperty('routes-sea','line-opacity',['case',['==',['get','r'],R.id],1,.45])}catch(e){}if(G.mode=='map')fitRoute()}})(selRoute);
+initMap();requestAnimationFrame(tick);
+map&&map.on('load',()=>{map.addLayer(tankerLayer);selRoute('cpc');setStage(-1);map.flyTo({center:[44,44],zoom:3.8,duration:0});setTimeout(()=>say('Welcome to TCO Route Lab — real satellite Earth'),600)});
+
+</script>
+
+<script>
+(function(){try{if('serviceWorker'in navigator&&location.protocol=='https:')navigator.serviceWorker.register('/sw.js')}catch(e){}
+var tg=window.Telegram&&Telegram.WebApp;if(tg&&tg.initData!==undefined){try{tg.ready();tg.expand();tg.setHeaderColor('#0F172A');tg.setBackgroundColor('#0F172A');tg.disableVerticalSwipes&&tg.disableVerticalSwipes();
+var sp=tg.initDataUnsafe&&tg.initDataUnsafe.start_param;if(sp=='quiz')setTimeout(function(){openModal('quiz')},1800);if(sp=='strategy')setTimeout(function(){openModal('strat')},1800)}catch(e){}}
+var ib;addEventListener('beforeinstallprompt',function(e){e.preventDefault();ib=e;var b=document.createElement('button');b.textContent='⤓ Install app';b.style.cssText='position:fixed;z-index:9;right:8px;bottom:170px';b.onclick=function(){ib.prompt();b.remove()};document.body.appendChild(b)})})();
+</script></body></html>

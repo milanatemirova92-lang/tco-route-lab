@@ -1,0 +1,7 @@
+{
+  "name": "tco-route-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TCO Route Lab: interactive Tengizchevroil export route and strategic analysis site",
+  "scripts": { "dev": "npx serve .", "build": "echo static" }
+}
